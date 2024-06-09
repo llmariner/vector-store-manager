@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "vector-store-manager-server.fullname" . }}-http
+  labels:
+    {{- include "vector-store-manager-server.labels" . | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.global.ingress.ingressClassName }}
+  rules:
+  - http:
+      paths:
+      - path: /v1/vector_stores
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "vector-store-manager-server.fullname" . }}-http
+            port:
+              number: {{ .Values.httpPort }}
