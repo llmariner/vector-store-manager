@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vector-store-manager-server.fullname" . }}
+  labels:
+    {{- include "vector-store-manager-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "vector-store-manager-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vector-store-manager-server.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ sha256sum (toJson .Values) }}
+    spec:
+      containers:
+      - name: vector-store-manager-server
+        image: "{{ .Values.image.repository }}:{{ default .Chart.Version .Values.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - run
+        - --config
+        - /etc/config/config.yaml
+        ports:
+        - name: http
+          containerPort: {{ .Values.httpPort }}
+          protocol: TCP
+        - name: grpc
+          containerPort: {{ .Values.grpcPort }}
+          protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "vector-store-manager-server.fullname" . }}

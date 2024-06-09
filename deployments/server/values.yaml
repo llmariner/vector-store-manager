@@ -1,0 +1,17 @@
+global:
+  ingress:
+    ingressClassName:
+
+  auth:
+    enable:
+    rbacInternalServerAddr:
+
+httpPort: 8080
+grpcPort: 8081
+
+replicaCount: 1
+image:
+  repository: public.ecr.aws/v8n3t7y5/llm-operator/vector-store-manager-server
+  pullPolicy: IfNotPresent
+
+version:
