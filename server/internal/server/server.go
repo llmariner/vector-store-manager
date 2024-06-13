@@ -7,30 +7,64 @@ import (
 	"net"
 	"net/http"
 
+	fv1 "github.com/llm-operator/file-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
-	v1 "github.com/llm-operator/vector-store-manager/api/v1"
+	"github.com/llm-operator/vector-store-manager/api/v1"
 	"github.com/llm-operator/vector-store-manager/server/internal/config"
+	"github.com/llm-operator/vector-store-manager/server/internal/store"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
+)
+
+const (
+	defaultProjectID      = "default"
+	defaultOrganizationID = "default"
+	defaultTenantID       = "default-tenant-id"
+
+	defaultPageSize = 20
+	maxPageSize     = 100
 )
 
 type reqIntercepter interface {
 	InterceptHTTPRequest(req *http.Request) (int, auth.UserInfo, error)
 }
 
+type fileGetClient interface {
+	GetFile(ctx context.Context, in *fv1.GetFileRequest, opts ...grpc.CallOption) (*fv1.File, error)
+}
+
+type vstoreClient interface {
+	CreateVectorStore(ctx context.Context, name string) (int64, error)
+	UpdateVectorStoreName(ctx context.Context, oldName, newName string) error
+	DeleteVectorStore(ctx context.Context, name string) error
+	ListVectorStores(ctx context.Context) ([]int64, error)
+}
+
 // New creates a server.
-func New() *S {
-	return &S{}
+func New(
+	store *store.S,
+	fileGetClient fileGetClient,
+	vstoreClient vstoreClient,
+) *S {
+	return &S{
+		store:         store,
+		fileGetClient: fileGetClient,
+		vstoreClient:  vstoreClient,
+	}
 }
 
 // S is a server.
 type S struct {
 	v1.UnimplementedVectorStoreServiceServer
 
-	srv *grpc.Server
+	fileGetClient fileGetClient
+	vstoreClient  vstoreClient
+	store         *store.S
+	srv           *grpc.Server
 
-	reqIntercepter reqIntercepter
-	enableAuth     bool
+	enableAuth bool
 }
 
 // Run starts the gRPC server.
@@ -41,14 +75,12 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 	if authConfig.Enable {
 		ai, err := auth.NewInterceptor(ctx, auth.Config{
 			RBACServerAddr: authConfig.RBACInternalServerAddr,
-			AccessResource: "api.files",
+			AccessResource: "api.vector-stores",
 		})
 		if err != nil {
 			return err
 		}
 		opts = append(opts, grpc.ChainUnaryInterceptor(ai.Unary()))
-
-		s.reqIntercepter = ai
 		s.enableAuth = true
 	}
 
@@ -71,4 +103,20 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 // Stop stops the gRPC server.
 func (s *S) Stop() {
 	s.srv.Stop()
+}
+
+func (s *S) extractUserInfoFromContext(ctx context.Context) (*auth.UserInfo, error) {
+	if !s.enableAuth {
+		return &auth.UserInfo{
+			OrganizationID: defaultOrganizationID,
+			ProjectID:      defaultProjectID,
+			TenantID:       defaultTenantID,
+		}, nil
+	}
+	var ok bool
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "user info not found")
+	}
+	return userInfo, nil
 }

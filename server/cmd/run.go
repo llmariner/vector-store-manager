@@ -7,11 +7,14 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-
+	"github.com/llm-operator/common/pkg/db"
+	fv1 "github.com/llm-operator/file-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/vector-store-manager/api/v1"
 	"github.com/llm-operator/vector-store-manager/server/internal/config"
+	"github.com/llm-operator/vector-store-manager/server/internal/milvus"
 	"github.com/llm-operator/vector-store-manager/server/internal/server"
+	"github.com/llm-operator/vector-store-manager/server/internal/store"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -65,7 +68,28 @@ func run(ctx context.Context, c *config.Config) error {
 		return err
 	}
 
-	s := server.New()
+	conn, err := grpc.Dial(c.FileManagerServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
+	}
+	fclient := fv1.NewFilesServiceClient(conn)
+
+	dbInst, err := db.OpenDB(c.Database)
+	if err != nil {
+		return err
+	}
+
+	st := store.New(dbInst)
+	if err := st.AutoMigrate(); err != nil {
+		return err
+	}
+
+	vstoreClient, err := milvus.New(ctx, c.VectorDatabase)
+	if err != nil {
+		return err
+	}
+
+	s := server.New(st, fclient, vstoreClient)
 
 	errCh := make(chan error)
 	go func() {
