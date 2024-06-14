@@ -6,6 +6,10 @@ include common.mk
 .PHONY: test
 test: go-test-all
 
+.PHONY: test-integration
+test-integration:
+	@go test ./... -tags=integration
+
 .PHONY: lint
 lint: go-lint-all git-clean-check
 
@@ -18,4 +22,4 @@ build-server:
 
 .PHONY: build-docker-server
 build-docker-server:
-	docker build --build-arg TARGETARCH=amd64 -t llm-operator/manager/deployments/server:latest -f build/server/Dockerfile .
+	docker build --build-arg TARGETARCH=amd64 -t llm-operator/vector-store-manager-server:latest -f build/server/Dockerfile .

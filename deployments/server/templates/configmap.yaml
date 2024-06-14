@@ -8,6 +8,19 @@ data:
   config.yaml: |
     httpPort: {{ .Values.httpPort }}
     grpcPort: {{ .Values.grpcPort }}
+    fileManagerServerAddr: {{ .Values.fileManagerServerAddr }}
+    database:
+      host: {{ .Values.global.database.host }}
+      port: {{ .Values.global.database.port }}
+      database: {{ .Values.database.database }}
+      username: {{ .Values.global.database.username }}
+      passwordEnvName: DB_PASSWORD
+    vectorDatabase:
+      host: {{ .Values.vectorDatabase.host }}
+      port: {{ .Values.vectorDatabase.port }}
+      database: {{ .Values.vectorDatabase.database }}
+      username: {{ .Values.vectorDatabase.username }}
+      passwordEnvName: VECTOR_DB_PASSWORD
     auth:
       enable: {{ .Values.global.auth.enable }}
       rbacInternalServerAddr: {{ .Values.global.auth.rbacInternalServerAddr }}

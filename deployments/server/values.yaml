@@ -1,4 +1,11 @@
 global:
+  database:
+    host:
+    port:
+    username:
+  databaseSecret:
+    name:
+    key:
   ingress:
     ingressClassName:
     annotations:
@@ -13,9 +20,24 @@ global:
 httpPort: 8080
 grpcPort: 8081
 
+# The following default values work if model-manager-server runs in the same namespace.
+fileManagerServerAddr: file-manager-server-grpc:8081
+
 replicaCount: 1
 image:
   repository: public.ecr.aws/v8n3t7y5/llm-operator/vector-store-manager-server
   pullPolicy: IfNotPresent
 
 version:
+
+database:
+  database: vector_store_manager
+
+vectorDatabase:
+  host: milvus.milvus
+  port: 19530
+  username: root
+  database: default
+vectorDatabaseSecret:
+  name: vector-store
+  key: password

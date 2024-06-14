@@ -35,6 +35,17 @@ spec:
         - name: config
           mountPath: /etc/config
           readOnly: true
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.databaseSecret.name }}
+              key: {{ .Values.global.databaseSecret.key }}
+        - name: VECTOR_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.vectorDatabaseSecret.name }}
+              key: {{ .Values.vectorDatabaseSecret.key }}
       volumes:
       - name: config
         configMap:

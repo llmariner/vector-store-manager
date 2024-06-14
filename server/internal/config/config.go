@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/llm-operator/common/pkg/db"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,6 +30,10 @@ type Config struct {
 	GRPCPort int `yaml:"grpcPort"`
 	HTTPPort int `yaml:"httpPort"`
 
+	FileManagerServerAddr string    `yaml:"fileManagerServerAddr"`
+	VectorDatabase        db.Config `yaml:"vectorDatabase"`
+	Database              db.Config `yaml:"database"`
+
 	AuthConfig AuthConfig `yaml:"auth"`
 }
 
@@ -40,7 +45,15 @@ func (c *Config) Validate() error {
 	if c.HTTPPort <= 0 {
 		return fmt.Errorf("httpPort must be greater than 0")
 	}
-
+	if c.FileManagerServerAddr == "" {
+		return fmt.Errorf("file manager address must be set")
+	}
+	if err := c.VectorDatabase.Validate(); err != nil {
+		return fmt.Errorf("vector database: %s", err)
+	}
+	if err := c.Database.Validate(); err != nil {
+		return fmt.Errorf("database: %s", err)
+	}
 	if err := c.AuthConfig.Validate(); err != nil {
 		return err
 	}
