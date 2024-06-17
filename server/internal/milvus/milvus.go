@@ -2,6 +2,7 @@ package milvus
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -23,10 +24,11 @@ type S struct {
 
 // New creates an active client connection to the Milvus server.
 func New(ctx context.Context, cfg db.Config) (*S, error) {
-	log.Printf("Connecting to Milvus: %s\n", cfg.Host)
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	log.Printf("Connecting to Milvus: %s\n", addr)
 	passwd := os.Getenv(cfg.PasswordEnvName)
 	config := client.Config{
-		Address:  cfg.Host,
+		Address:  addr,
 		Username: cfg.Username,
 		Password: passwd,
 		DBName:   cfg.Database,
