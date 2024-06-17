@@ -2,8 +2,10 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
+	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -46,14 +48,16 @@ func TestCreateAndListJobs(t *testing.T) {
 	st, teardown := NewTest(t)
 	defer teardown()
 
-	collectionID := int64(1)
-	collectionName := "collection0"
-	project := "project0"
+	const (
+		collectionID   = int64(1)
+		collectionName = "collection"
+		project        = "project0"
+	)
 
 	for i := 0; i < 3; i++ {
 		c := Collection{
 			CollectionID: collectionID + int64(i),
-			Name:         collectionName,
+			Name:         fmt.Sprintf("%s-%d", collectionName, i),
 			Status:       CollectionStatusCompleted,
 			ProjectID:    project,
 		}
@@ -63,7 +67,7 @@ func TestCreateAndListJobs(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		c := Collection{
 			CollectionID: collectionID + int64(i) + int64(100),
-			Name:         collectionName,
+			Name:         fmt.Sprintf("%s-%d", collectionName, 100+i),
 			Status:       CollectionStatusCompleted,
 			ProjectID:    "unknown",
 		}
@@ -80,14 +84,16 @@ func TestListCollectionsWithPagination(t *testing.T) {
 	st, teardown := NewTest(t)
 	defer teardown()
 
-	collectionID := int64(1)
-	collectionName := "collection0"
-	project := "project0"
+	const (
+		collectionID   = int64(1)
+		collectionName = "collection"
+		project        = "project0"
+	)
 
 	for i := 0; i < 10; i++ {
 		c := Collection{
 			CollectionID: collectionID + int64(i),
-			Name:         collectionName,
+			Name:         fmt.Sprintf("%s-%d", collectionName, i),
 			Status:       CollectionStatusCompleted,
 			ProjectID:    project,
 		}
@@ -136,9 +142,11 @@ func TestUpdateCollection(t *testing.T) {
 	st, teardown := NewTest(t)
 	defer teardown()
 
-	collectionID := int64(1)
-	collectionName := "collection0"
-	project := "project0"
+	const (
+		collectionID   = int64(1)
+		collectionName = "collection0"
+		project        = "project0"
+	)
 
 	c := Collection{
 		CollectionID: collectionID,
@@ -165,9 +173,11 @@ func TestDeleteCollection(t *testing.T) {
 	st, teardown := NewTest(t)
 	defer teardown()
 
-	collectionID := int64(1)
-	collectionName := "collection0"
-	project := "project0"
+	const (
+		collectionID   = int64(1)
+		collectionName = "collection0"
+		project        = "project0"
+	)
 
 	c := Collection{
 		CollectionID: collectionID,
@@ -184,4 +194,31 @@ func TestDeleteCollection(t *testing.T) {
 	_, err = st.GetCollectionByCollectionID(project, collectionID)
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
+}
+
+func TestCreateCollection_SameName(t *testing.T) {
+	st, teardown := NewTest(t)
+	defer teardown()
+
+	const (
+		collectionName = "collection0"
+		project        = "project0"
+	)
+
+	err := st.CreateCollection(&Collection{
+		CollectionID: int64(1),
+		Name:         collectionName,
+		Status:       CollectionStatusCompleted,
+		ProjectID:    project,
+	})
+	assert.NoError(t, err)
+
+	err = st.CreateCollection(&Collection{
+		CollectionID: int64(2),
+		Name:         collectionName,
+		Status:       CollectionStatusCompleted,
+		ProjectID:    project,
+	})
+	assert.Error(t, err)
+	assert.True(t, gerrors.IsUniqueConstraintViolation(err))
 }

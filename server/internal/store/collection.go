@@ -31,7 +31,11 @@ type Collection struct {
 	// CollectionID is the ID of the collection in vector store.
 	CollectionID int64 `gorm:"uniqueIndex"`
 
-	Name string
+	TenantID       string
+	OrganizationID string
+	ProjectID      string `gorm:"uniqueIndex:idx_collection_project_id_name"`
+
+	Name string `gorm:"uniqueIndex:idx_collection_project_id_name"`
 
 	// UsageBytes is the total number of bytes used by the files in the vector store.
 	UsageBytes int64
@@ -52,11 +56,6 @@ type Collection struct {
 
 	// LastActiveAt is the Unix timestamp (in seconds) for when the vector store was last active.
 	LastActiveAt int64
-
-	TenantID string
-
-	OrganizationID string
-	ProjectID      string `gorm:"index"`
 
 	Version int
 }
