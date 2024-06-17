@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -28,7 +29,11 @@ const (
 type Collection struct {
 	gorm.Model
 
-	// CollectionID is the ID of the collection in vector store.
+	// VectorStoreID is the ID of the vector store that is externally visible in the API.
+	// This is also used as the name of the Milvus collection.
+	VectorStoreID string `gorm:"uniqueIndex"`
+
+	// CollectionID is the ID of the Milvus collection.
 	CollectionID int64 `gorm:"uniqueIndex"`
 
 	TenantID       string
@@ -68,10 +73,10 @@ func (s *S) CreateCollection(c *Collection) error {
 	return nil
 }
 
-// GetCollectionByCollectionID gets a collection.
-func (s *S) GetCollectionByCollectionID(projectID string, collectionID int64) (*Collection, error) {
+// GetCollectionByVectorStoreID gets a collection.
+func (s *S) GetCollectionByVectorStoreID(projectID string, vectorStoreID string) (*Collection, error) {
 	var c Collection
-	if err := s.db.Where("collection_id = ? AND project_id = ?", collectionID, projectID).Take(&c).Error; err != nil {
+	if err := s.db.Where("vector_store_id = ? AND project_id = ?", vectorStoreID, projectID).Take(&c).Error; err != nil {
 		return nil, err
 	}
 	return &c, nil
@@ -95,22 +100,32 @@ func (s *S) ListCollections(projectID string) ([]*Collection, error) {
 	return cs, nil
 }
 
-// ListCollectionsWithPagination finds collections with pagination. Collections are returned in the order of CollectionID.
-func (s *S) ListCollectionsWithPagination(projectID string, afterID int64, order string, limit int) ([]*Collection, bool, error) {
+// ListCollectionsWithPagination finds collections with pagination. Collections are returned in the order of VectorStoreID.
+func (s *S) ListCollectionsWithPagination(
+	projectID string,
+	afterCreatedAt time.Time,
+	afterID uint,
+	order string,
+	limit int,
+) ([]*Collection, bool, error) {
 	var cs []*Collection
 	q := s.db.Where("project_id = ?", projectID)
-	if order == "asc" {
-		order = "collection_id ASC"
-	} else {
-		order = "collection_id DESC"
-	}
-	if afterID >= 0 {
-		if order == "collection_id ASC" {
-			q = q.Where("collection_id > ?", afterID)
+	isAsc := order == "asc"
+
+	if afterCreatedAt != (time.Time{}) {
+		if isAsc {
+			q = q.Where("(created_at > ? OR (created_at = ? AND id > ?))", afterCreatedAt, afterCreatedAt, afterID)
 		} else {
-			q = q.Where("collection_id < ?", afterID)
+			q = q.Where("(created_at < ? OR (created_at = ? AND id < ?))", afterCreatedAt, afterCreatedAt, afterID)
 		}
 	}
+
+	if isAsc {
+		order = "created_at ASC, id ASC"
+	} else {
+		order = "created_at DESC, id DESC"
+	}
+
 	if err := q.Order(order).Limit(limit + 1).Find(&cs).Error; err != nil {
 		return nil, false, err
 	}
@@ -126,7 +141,7 @@ func (s *S) ListCollectionsWithPagination(projectID string, afterID int64, order
 // UpdateCollection updates the collection.
 func (s *S) UpdateCollection(nc *Collection) error {
 	result := s.db.Model(&Collection{}).
-		Where("collection_id = ?", nc.CollectionID).
+		Where("id = ?", nc.ID).
 		Where("version = ?", nc.Version).
 		Updates(map[string]interface{}{
 			"name":               nc.Name,
@@ -146,9 +161,9 @@ func (s *S) UpdateCollection(nc *Collection) error {
 }
 
 // DeleteCollection deletes the collection.
-func (s *S) DeleteCollection(projectID string, collectionID int64) error {
+func (s *S) DeleteCollection(projectID string, vectorStoreID string) error {
 	result := s.db.Unscoped().
-		Where("collection_id = ?", collectionID).
+		Where("vector_store_id = ?", vectorStoreID).
 		Where("project_id = ?", projectID).
 		Delete(&Collection{})
 	if err := result.Error; err != nil {
