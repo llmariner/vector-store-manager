@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -355,11 +354,16 @@ func (s *S) DeleteVectorStore(
 		return nil, err
 	}
 
-	if err := s.vstoreClient.DeleteVectorStore(ctx, req.Id); err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.Internal, "delete collection: %s", err)
+	c, err := s.store.GetCollectionByCollectionID(userInfo.ProjectID, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Id)
 		}
-		log.Printf("Collection %q not found in vector store server.", req.Id)
+		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
+	}
+
+	if err := s.vstoreClient.DeleteVectorStore(ctx, c.Name); err != nil {
+		return nil, status.Errorf(codes.Internal, "delete collection: %s", err)
 	}
 
 	// TODO(guangrui): Delete collection and collection metadata in a transaction.

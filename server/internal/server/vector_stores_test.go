@@ -434,8 +434,8 @@ func (c *noopVStoreClient) UpdateVectorStoreName(ctx context.Context, oldName, n
 	return nil
 }
 func (c *noopVStoreClient) DeleteVectorStore(ctx context.Context, name string) error {
-	for k, v := range c.vs {
-		if fmt.Sprintf("%d", v) == name {
+	for k := range c.vs {
+		if k == name {
 			delete(c.vs, k)
 			return nil
 		}
