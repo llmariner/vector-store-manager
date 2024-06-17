@@ -221,7 +221,7 @@ func (s *S) UpdateVectorStore(
 		return nil, err
 	}
 
-	id, err := getCollectionID(req.VectorStoreId)
+	id, err := getCollectionID(req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +229,7 @@ func (s *S) UpdateVectorStore(
 	c, err := s.store.GetCollectionByCollectionID(userInfo.ProjectID, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.VectorStoreId)
+			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Id)
 		}
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
@@ -307,16 +307,16 @@ func (s *S) DeleteVectorStore(
 		return nil, err
 	}
 
-	id, err := getCollectionID(req.VectorStoreId)
+	id, err := getCollectionID(req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.vstoreClient.DeleteVectorStore(ctx, req.VectorStoreId); err != nil {
+	if err := s.vstoreClient.DeleteVectorStore(ctx, req.Id); err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.Internal, "delete collection: %s", err)
 		}
-		log.Printf("Collection %q not found in vector store server.", req.VectorStoreId)
+		log.Printf("Collection %q not found in vector store server.", req.Id)
 	}
 
 	// TODO(guangrui): Delete collection and collection metadata in a transaction.
@@ -327,7 +327,7 @@ func (s *S) DeleteVectorStore(
 		return nil, status.Errorf(codes.Internal, "delete collection metadata: %s", err)
 	}
 	return &v1.DeleteVectorStoreResponse{
-		Id:      req.VectorStoreId,
+		Id:      req.Id,
 		Object:  vectorStoreObject,
 		Deleted: true,
 	}, nil
