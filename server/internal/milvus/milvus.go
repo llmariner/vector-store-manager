@@ -23,6 +23,7 @@ type S struct {
 
 // New creates an active client connection to the Milvus server.
 func New(ctx context.Context, cfg db.Config) (*S, error) {
+	log.Printf("Connecting to Milvus: %s\n", cfg.Host)
 	passwd := os.Getenv(cfg.PasswordEnvName)
 	config := client.Config{
 		Address:  cfg.Host,
@@ -34,6 +35,7 @@ func New(ctx context.Context, cfg db.Config) (*S, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("Connected to Milvus\n")
 	return &S{
 		client: c,
 	}, nil
