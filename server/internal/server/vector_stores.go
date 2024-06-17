@@ -207,6 +207,41 @@ func (s *S) ListVectorStores(
 	}, nil
 }
 
+// GetVectorStore gets a vector store.
+func (s *S) GetVectorStore(
+	ctx context.Context,
+	req *v1.GetVectorStoreRequest,
+) (*v1.VectorStore, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id is required")
+	}
+
+	id, err := getCollectionID(req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := s.store.GetCollectionByCollectionID(userInfo.ProjectID, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Id)
+		}
+		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
+	}
+
+	cm, err := s.store.ListCollectionMetadataByCollectionID(c.CollectionID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list collection metadata: %s", err)
+	}
+
+	return toVectorStoreProto(c, cm), nil
+}
+
 // UpdateVectorStore updates a vector store.
 func (s *S) UpdateVectorStore(
 	ctx context.Context,
