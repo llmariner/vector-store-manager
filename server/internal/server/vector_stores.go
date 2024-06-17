@@ -52,11 +52,9 @@ func (s *S) CreateVectorStore(
 		}
 	}
 
-	_, err = s.store.GetCollectionByName(userInfo.ProjectID, req.Name)
-	if err == nil {
+	if _, err := s.store.GetCollectionByName(userInfo.ProjectID, req.Name); err == nil {
 		return nil, status.Errorf(codes.AlreadyExists, "vector store %q already exists", req.Name)
-	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
