@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 
 	fv1 "github.com/llm-operator/file-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
-	"github.com/llm-operator/vector-store-manager/api/v1"
+	v1 "github.com/llm-operator/vector-store-manager/api/v1"
 	"github.com/llm-operator/vector-store-manager/server/internal/config"
 	"github.com/llm-operator/vector-store-manager/server/internal/store"
 	"google.golang.org/grpc"
@@ -26,10 +25,6 @@ const (
 	defaultPageSize = 20
 	maxPageSize     = 100
 )
-
-type reqIntercepter interface {
-	InterceptHTTPRequest(req *http.Request) (int, auth.UserInfo, error)
-}
 
 type fileGetClient interface {
 	GetFile(ctx context.Context, in *fv1.GetFileRequest, opts ...grpc.CallOption) (*fv1.File, error)
