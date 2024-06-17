@@ -98,10 +98,9 @@ func TestListVectorStores(t *testing.T) {
 	}
 
 	tcs := []struct {
-		name    string
-		req     *v1.ListVectorStoresRequest
-		resp    *v1.ListVectorStoresResponse
-		wantErr bool
+		name string
+		req  *v1.ListVectorStoresRequest
+		resp *v1.ListVectorStoresResponse
 	}{
 		{
 			name: "empty body",
@@ -126,7 +125,6 @@ func TestListVectorStores(t *testing.T) {
 					},
 				},
 			},
-			wantErr: false,
 		},
 		{
 			name: "success with after",
@@ -146,7 +144,6 @@ func TestListVectorStores(t *testing.T) {
 					},
 				},
 			},
-			wantErr: false,
 		},
 	}
 
@@ -182,6 +179,71 @@ func TestListVectorStores(t *testing.T) {
 			assert.Equal(t, tc.resp.FirstId, respList.FirstId)
 			assert.Equal(t, tc.resp.LastId, respList.LastId)
 			assert.Equal(t, tc.resp.HasMore, respList.HasMore)
+		})
+	}
+}
+
+func TestGetVectorStores(t *testing.T) {
+	vs := map[string]int64{
+		"vector_store_1": int64(1),
+		"vector_store_2": int64(2),
+	}
+
+	tcs := []struct {
+		name    string
+		req     *v1.GetVectorStoreRequest
+		resp    *v1.VectorStore
+		wantErr bool
+	}{
+		{
+			name: "success",
+			req: &v1.GetVectorStoreRequest{
+				Id: "1",
+			},
+			resp: &v1.VectorStore{
+				Id:   "1",
+				Name: "vector_store_1",
+			},
+			wantErr: false,
+		},
+		{
+			name: "not found",
+			req: &v1.GetVectorStoreRequest{
+				Id: "10",
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			st, tearDown := store.NewTest(t)
+			defer tearDown()
+
+			srv := New(
+				st,
+				&noopFileGetClient{},
+				&noopVStoreClient{
+					vs: vs,
+				},
+			)
+			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+			for name, id := range vs {
+				resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
+					Name: name,
+				})
+				assert.NoError(t, err)
+				assert.Equal(t, name, resp.Name)
+				assert.Equal(t, fmt.Sprintf("%d", id), resp.Id)
+			}
+
+			got, err := srv.GetVectorStore(ctx, tc.req)
+			if tc.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tc.resp.Name, got.Name)
 		})
 	}
 }
