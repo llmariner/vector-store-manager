@@ -252,6 +252,10 @@ func (s *S) UpdateVectorStore(
 		return nil, err
 	}
 
+	if req.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id is required")
+	}
+
 	if err := validateMetadata(req.Metadata); err != nil {
 		return nil, err
 	}
@@ -340,6 +344,10 @@ func (s *S) DeleteVectorStore(
 	userInfo, err := s.extractUserInfoFromContext(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if req.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
 	id, err := getCollectionID(req.Id)
