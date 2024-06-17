@@ -202,7 +202,7 @@ func TestDeleteVectorStore(t *testing.T) {
 		{
 			name: "success",
 			req: &v1.DeleteVectorStoreRequest{
-				VectorStoreId: "1",
+				Id: "1",
 			},
 			resp: &v1.DeleteVectorStoreResponse{
 				Id:      "1",
@@ -214,7 +214,7 @@ func TestDeleteVectorStore(t *testing.T) {
 		{
 			name: "not found",
 			req: &v1.DeleteVectorStoreRequest{
-				VectorStoreId: "2",
+				Id: "2",
 			},
 			resp:    &v1.DeleteVectorStoreResponse{},
 			wantErr: true,
@@ -274,8 +274,8 @@ func TestUpdateVectorStore(t *testing.T) {
 		{
 			name: "update name",
 			req: &v1.UpdateVectorStoreRequest{
-				VectorStoreId: "1",
-				Name:          "new_vector_store_1",
+				Id:   "1",
+				Name: "new_vector_store_1",
 			},
 			resp: &v1.VectorStore{
 				Id:       "1",
@@ -288,7 +288,7 @@ func TestUpdateVectorStore(t *testing.T) {
 		{
 			name: "update metadata",
 			req: &v1.UpdateVectorStoreRequest{
-				VectorStoreId: "1",
+				Id: "1",
 				Metadata: map[string]string{
 					"key0": "value0",
 				},

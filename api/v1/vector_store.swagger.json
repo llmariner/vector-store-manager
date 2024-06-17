@@ -95,7 +95,7 @@
         ]
       }
     },
-    "/v1/vector_stores/{vectorStoreId}": {
+    "/v1/vector_stores/{id}": {
       "get": {
         "operationId": "VectorStoreService_GetVectorStore",
         "responses": {
@@ -114,7 +114,7 @@
         },
         "parameters": [
           {
-            "name": "vectorStoreId",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -142,7 +142,7 @@
         },
         "parameters": [
           {
-            "name": "vectorStoreId",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -170,7 +170,7 @@
         },
         "parameters": [
           {
-            "name": "vectorStoreId",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"

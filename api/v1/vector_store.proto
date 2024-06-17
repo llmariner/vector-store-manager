@@ -75,11 +75,11 @@ message ListVectorStoresResponse {
 }
 
 message GetVectorStoreRequest {
-    string vector_store_id = 1;
+    string id = 1;
 }
 
 message UpdateVectorStoreRequest {
-    string vector_store_id = 1;
+    string id = 1;
     // string or null.
     string name = 2;
     ExpiresAfter expires_after = 3;
@@ -87,7 +87,7 @@ message UpdateVectorStoreRequest {
 }
 
 message DeleteVectorStoreRequest {
-    string vector_store_id = 1;
+    string id = 1;
 }
 
 message DeleteVectorStoreResponse {
@@ -173,20 +173,20 @@ service VectorStoreService {
 
   rpc GetVectorStore(GetVectorStoreRequest) returns (VectorStore) {
     option (google.api.http) = {
-      get: "/v1/vector_stores/{vector_store_id}"
+      get: "/v1/vector_stores/{id}"
     };
   }
 
   rpc UpdateVectorStore(UpdateVectorStoreRequest) returns (VectorStore) {
     option (google.api.http) = {
-      post: "/v1/vector_stores/{vector_store_id}"
+      post: "/v1/vector_stores/{id}"
       body: "*"
     };
   }
 
   rpc DeleteVectorStore(DeleteVectorStoreRequest) returns (DeleteVectorStoreResponse) {
     option (google.api.http) = {
-      delete: "/v1/vector_stores/{vector_store_id}"
+      delete: "/v1/vector_stores/{id}"
     };
   }
 
