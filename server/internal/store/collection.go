@@ -67,7 +67,12 @@ type Collection struct {
 
 // CreateCollection creates a new collection.
 func (s *S) CreateCollection(c *Collection) error {
-	if err := s.db.Create(c).Error; err != nil {
+	return CreateCollectionInTransaction(s.db, c)
+}
+
+// CreateCollectionInTransaction creates a new collection.
+func CreateCollectionInTransaction(tx *gorm.DB, c *Collection) error {
+	if err := tx.Create(c).Error; err != nil {
 		return err
 	}
 	return nil
@@ -140,7 +145,12 @@ func (s *S) ListCollectionsWithPagination(
 
 // UpdateCollection updates the collection.
 func (s *S) UpdateCollection(nc *Collection) error {
-	result := s.db.Model(&Collection{}).
+	return UpdateCollectionInTransaction(s.db, nc)
+}
+
+// UpdateCollectionInTransaction updates the collection.
+func UpdateCollectionInTransaction(tx *gorm.DB, nc *Collection) error {
+	result := tx.Model(&Collection{}).
 		Where("id = ?", nc.ID).
 		Where("version = ?", nc.Version).
 		Updates(map[string]interface{}{
@@ -162,7 +172,12 @@ func (s *S) UpdateCollection(nc *Collection) error {
 
 // DeleteCollection deletes the collection.
 func (s *S) DeleteCollection(projectID string, vectorStoreID string) error {
-	result := s.db.Unscoped().
+	return DeleteCollectionInTransaction(s.db, projectID, vectorStoreID)
+}
+
+// DeleteCollectionInTransaction deletes the collection.
+func DeleteCollectionInTransaction(tx *gorm.DB, projectID string, vectorStoreID string) error {
+	result := tx.Unscoped().
 		Where("vector_store_id = ?", vectorStoreID).
 		Where("project_id = ?", projectID).
 		Delete(&Collection{})
