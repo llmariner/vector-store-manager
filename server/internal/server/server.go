@@ -32,7 +32,6 @@ type fileGetClient interface {
 
 type vstoreClient interface {
 	CreateVectorStore(ctx context.Context, name string) (int64, error)
-	UpdateVectorStoreName(ctx context.Context, oldName, newName string) error
 	DeleteVectorStore(ctx context.Context, name string) error
 	ListVectorStores(ctx context.Context) ([]int64, error)
 }

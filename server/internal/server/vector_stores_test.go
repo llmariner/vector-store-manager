@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	fv1 "github.com/llm-operator/file-manager/api/v1"
@@ -11,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -19,7 +17,6 @@ func TestCreateVectorStore(t *testing.T) {
 	const (
 		fileID          = "file0"
 		vectorStoreName = "vector_store_1"
-		vectorStoreID   = int64(1)
 	)
 
 	tcs := []struct {
@@ -65,12 +62,10 @@ func TestCreateVectorStore(t *testing.T) {
 					},
 				},
 				&noopVStoreClient{
-					vs: map[string]int64{
-						vectorStoreName: vectorStoreID,
-					},
+					vs: map[string]int64{},
 				},
 			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, tc.req)
 			if tc.wantErr {
 				assert.Error(t, err)
@@ -78,7 +73,6 @@ func TestCreateVectorStore(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, fmt.Sprintf("%d", vectorStoreID), resp.Id)
 			assert.Equal(t, vectorStoreName, resp.Name)
 		})
 	}
@@ -88,13 +82,38 @@ func TestListVectorStores(t *testing.T) {
 	const (
 		fileID          = "file0"
 		vectorStoreName = "vector_store_1"
-		vectorStoreID   = int64(1)
 	)
 
-	vs := map[string]int64{
-		vectorStoreName:  vectorStoreID,
-		"vector_store_2": int64(2),
-		"vector_store_3": int64(3),
+	names := []string{
+		vectorStoreName,
+		"vector_store_2",
+		"vector_store_3",
+	}
+
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(
+		st,
+		&noopFileGetClient{
+			ids: map[string]bool{
+				fileID: true,
+			},
+		},
+		&noopVStoreClient{
+			vs: map[string]int64{},
+		},
+	)
+
+	ctx := context.Background()
+	var vss []*v1.VectorStore
+	for _, name := range names {
+		vs, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
+			Name: name,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, name, vs.Name)
+		vss = append(vss, vs)
 	}
 
 	tcs := []struct {
@@ -107,20 +126,20 @@ func TestListVectorStores(t *testing.T) {
 			req:  &v1.ListVectorStoresRequest{},
 			resp: &v1.ListVectorStoresResponse{
 				Object:  vectorStoreName,
-				FirstId: "3",
-				LastId:  "1",
+				FirstId: vss[2].Id,
+				LastId:  vss[0].Id,
 				HasMore: false,
 				Data: []*v1.VectorStore{
 					{
-						Id:   "3",
+						Id:   vss[2].Id,
 						Name: "vector_store_3",
 					},
 					{
-						Id:   "2",
+						Id:   vss[1].Id,
 						Name: "vector_store_2",
 					},
 					{
-						Id:   "1",
+						Id:   vss[0].Id,
 						Name: "vector_store_1",
 					},
 				},
@@ -130,17 +149,17 @@ func TestListVectorStores(t *testing.T) {
 			name: "success with after",
 			req: &v1.ListVectorStoresRequest{
 				Limit: 1,
-				After: "3",
+				After: vss[1].Id,
 			},
 			resp: &v1.ListVectorStoresResponse{
 				Object:  vectorStoreName,
-				FirstId: "2",
-				LastId:  "2",
-				HasMore: true,
+				FirstId: vss[2].Id,
+				LastId:  vss[2].Id,
+				HasMore: false,
 				Data: []*v1.VectorStore{
 					{
-						Id:   "2",
-						Name: "vector_store_2",
+						Id:   vss[0].Id,
+						Name: "vector_store_1",
 					},
 				},
 			},
@@ -149,44 +168,44 @@ func TestListVectorStores(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			st, tearDown := store.NewTest(t)
-			defer tearDown()
-
-			srv := New(
-				st,
-				&noopFileGetClient{
-					ids: map[string]bool{
-						fileID: true,
-					},
-				},
-				&noopVStoreClient{
-					vs: vs,
-				},
-			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
-			for name, id := range vs {
-				resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
-					Name: name,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, name, resp.Name)
-				assert.Equal(t, fmt.Sprintf("%d", id), resp.Id)
-			}
-
+			ctx := context.Background()
 			respList, err := srv.ListVectorStores(ctx, tc.req)
 			assert.NoError(t, err)
-			assert.Equal(t, len(tc.resp.Data), len(respList.Data))
-			assert.Equal(t, tc.resp.FirstId, respList.FirstId)
-			assert.Equal(t, tc.resp.LastId, respList.LastId)
+			assert.Len(t, respList.Data, len(tc.resp.Data))
+			for i, want := range tc.resp.Data {
+				assert.Equal(t, want.Id, respList.Data[i].Id)
+				assert.Equal(t, want.Name, respList.Data[i].Name)
+			}
 			assert.Equal(t, tc.resp.HasMore, respList.HasMore)
 		})
 	}
 }
 
 func TestGetVectorStores(t *testing.T) {
-	vs := map[string]int64{
-		"vector_store_1": int64(1),
-		"vector_store_2": int64(2),
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(
+		st,
+		&noopFileGetClient{},
+		&noopVStoreClient{
+			vs: map[string]int64{},
+		},
+	)
+
+	names := []string{
+		"vector_store_1",
+		"vector_store_2",
+	}
+	ctx := context.Background()
+	var vss []*v1.VectorStore
+	for _, name := range names {
+		vs, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
+			Name: name,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, name, vs.Name)
+		vss = append(vss, vs)
 	}
 
 	tcs := []struct {
@@ -198,18 +217,18 @@ func TestGetVectorStores(t *testing.T) {
 		{
 			name: "success",
 			req: &v1.GetVectorStoreRequest{
-				Id: "1",
+				Id: vss[0].Id,
 			},
 			resp: &v1.VectorStore{
-				Id:   "1",
-				Name: "vector_store_1",
+				Id:   vss[0].Id,
+				Name: vss[0].Name,
 			},
 			wantErr: false,
 		},
 		{
 			name: "not found",
 			req: &v1.GetVectorStoreRequest{
-				Id: "10",
+				Id: "dummy",
 			},
 			wantErr: true,
 		},
@@ -217,32 +236,13 @@ func TestGetVectorStores(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			st, tearDown := store.NewTest(t)
-			defer tearDown()
-
-			srv := New(
-				st,
-				&noopFileGetClient{},
-				&noopVStoreClient{
-					vs: vs,
-				},
-			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
-			for name, id := range vs {
-				resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
-					Name: name,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, name, resp.Name)
-				assert.Equal(t, fmt.Sprintf("%d", id), resp.Id)
-			}
-
 			got, err := srv.GetVectorStore(ctx, tc.req)
 			if tc.wantErr {
 				assert.Error(t, err)
 				return
 			}
 			assert.NoError(t, err)
+			assert.Equal(t, tc.resp.Id, got.Id)
 			assert.Equal(t, tc.resp.Name, got.Name)
 		})
 	}
@@ -252,33 +252,40 @@ func TestDeleteVectorStore(t *testing.T) {
 	const (
 		fileID          = "file0"
 		vectorStoreName = "vector_store_1"
-		vectorStoreID   = int64(1)
 	)
 
 	tcs := []struct {
 		name    string
-		req     *v1.DeleteVectorStoreRequest
-		resp    *v1.DeleteVectorStoreResponse
+		req     func(id string) *v1.DeleteVectorStoreRequest
+		resp    func(id string) *v1.DeleteVectorStoreResponse
 		wantErr bool
 	}{
 		{
 			name: "success",
-			req: &v1.DeleteVectorStoreRequest{
-				Id: "1",
+			req: func(id string) *v1.DeleteVectorStoreRequest {
+				return &v1.DeleteVectorStoreRequest{
+					Id: id,
+				}
 			},
-			resp: &v1.DeleteVectorStoreResponse{
-				Id:      "1",
-				Object:  vectorStoreName,
-				Deleted: true,
+			resp: func(id string) *v1.DeleteVectorStoreResponse {
+				return &v1.DeleteVectorStoreResponse{
+					Id:      id,
+					Object:  vectorStoreName,
+					Deleted: true,
+				}
 			},
 			wantErr: false,
 		},
 		{
 			name: "not found",
-			req: &v1.DeleteVectorStoreRequest{
-				Id: "2",
+			req: func(id string) *v1.DeleteVectorStoreRequest {
+				return &v1.DeleteVectorStoreRequest{
+					Id: "not-existing",
+				}
 			},
-			resp:    &v1.DeleteVectorStoreResponse{},
+			resp: func(id string) *v1.DeleteVectorStoreResponse {
+				return &v1.DeleteVectorStoreResponse{}
+			},
 			wantErr: true,
 		},
 	}
@@ -296,26 +303,25 @@ func TestDeleteVectorStore(t *testing.T) {
 					},
 				},
 				&noopVStoreClient{
-					vs: map[string]int64{
-						vectorStoreName: vectorStoreID,
-					},
+					vs: map[string]int64{},
 				},
 			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
 				Name: vectorStoreName,
 			})
 			assert.NoError(t, err)
 			assert.Equal(t, vectorStoreName, resp.Name)
 
-			respDelete, err := srv.DeleteVectorStore(ctx, tc.req)
+			respDelete, err := srv.DeleteVectorStore(ctx, tc.req(resp.Id))
 			if tc.wantErr {
 				assert.Error(t, err)
 				return
 			}
 			assert.NoError(t, err)
-			assert.Equal(t, tc.resp.Id, respDelete.Id)
-			assert.Equal(t, tc.resp.Deleted, respDelete.Deleted)
+			want := tc.resp(resp.Id)
+			assert.Equal(t, want.Id, respDelete.Id)
+			assert.Equal(t, want.Deleted, respDelete.Deleted)
 		})
 	}
 }
@@ -324,20 +330,21 @@ func TestUpdateVectorStore(t *testing.T) {
 	const (
 		fileID          = "file0"
 		vectorStoreName = "vector_store_1"
-		vectorStoreID   = int64(1)
 	)
 
 	tcs := []struct {
 		name    string
-		req     *v1.UpdateVectorStoreRequest
+		req     func(id string) *v1.UpdateVectorStoreRequest
 		resp    *v1.VectorStore
 		wantErr bool
 	}{
 		{
 			name: "update name",
-			req: &v1.UpdateVectorStoreRequest{
-				Id:   "1",
-				Name: "new_vector_store_1",
+			req: func(id string) *v1.UpdateVectorStoreRequest {
+				return &v1.UpdateVectorStoreRequest{
+					Id:   id,
+					Name: "new_vector_store_1",
+				}
 			},
 			resp: &v1.VectorStore{
 				Id:       "1",
@@ -349,11 +356,13 @@ func TestUpdateVectorStore(t *testing.T) {
 		},
 		{
 			name: "update metadata",
-			req: &v1.UpdateVectorStoreRequest{
-				Id: "1",
-				Metadata: map[string]string{
-					"key0": "value0",
-				},
+			req: func(id string) *v1.UpdateVectorStoreRequest {
+				return &v1.UpdateVectorStoreRequest{
+					Id: id,
+					Metadata: map[string]string{
+						"key0": "value0",
+					},
+				}
 			},
 			resp: &v1.VectorStore{
 				Id:     "1",
@@ -380,19 +389,17 @@ func TestUpdateVectorStore(t *testing.T) {
 					},
 				},
 				&noopVStoreClient{
-					vs: map[string]int64{
-						vectorStoreName: vectorStoreID,
-					},
+					vs: map[string]int64{},
 				},
 			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
+			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
 				Name: vectorStoreName,
 			})
 			assert.NoError(t, err)
 			assert.Equal(t, vectorStoreName, resp.Name)
 
-			resp, err = srv.UpdateVectorStore(ctx, tc.req)
+			resp, err = srv.UpdateVectorStore(ctx, tc.req(resp.Id))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.resp.Name, resp.Name)
 			assert.Equal(t, tc.resp.Metadata, resp.Metadata)
@@ -417,22 +424,11 @@ type noopVStoreClient struct {
 }
 
 func (c *noopVStoreClient) CreateVectorStore(ctx context.Context, name string) (int64, error) {
-	found, ok := c.vs[name]
-	if !ok {
-		return 0, status.Error(codes.Internal, "failed to create vector store")
-	}
-	return found, nil
+	newID := int64(len(c.vs) + 1)
+	c.vs[name] = newID
+	return newID, nil
 }
 
-func (c *noopVStoreClient) UpdateVectorStoreName(ctx context.Context, oldName, newName string) error {
-	found, ok := c.vs[oldName]
-	if !ok {
-		return status.Error(codes.NotFound, "name not found")
-	}
-	c.vs[newName] = found
-
-	return nil
-}
 func (c *noopVStoreClient) DeleteVectorStore(ctx context.Context, name string) error {
 	for k := range c.vs {
 		if k == name {

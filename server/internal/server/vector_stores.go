@@ -3,11 +3,10 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/llm-operator/common/pkg/id"
 	fv1 "github.com/llm-operator/file-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/vector-store-manager/api/v1"
@@ -57,12 +56,20 @@ func (s *S) CreateVectorStore(
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
-	cid, err := s.vstoreClient.CreateVectorStore(ctx, req.Name)
+	// vector store ID is not a k8s resource, but the ID is used as a Milivus collection name,
+	// which can only contain numbers, letters and underscores.
+	vsID, err := id.GenerateIDForK8SResource("vs_")
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "generate id: %s", err)
+	}
+
+	cid, err := s.vstoreClient.CreateVectorStore(ctx, vsID)
 	if err != nil {
 		return nil, err
 	}
 
 	c := &store.Collection{
+		VectorStoreID:  vsID,
 		CollectionID:   cid,
 		Name:           req.Name,
 		Status:         store.CollectionStatusInProgress,
@@ -87,20 +94,15 @@ func (s *S) CreateVectorStore(
 	var cms []*store.CollectionMetadata
 	for k, v := range req.Metadata {
 		cms = append(cms, &store.CollectionMetadata{
-			CollectionID: cid,
-			Key:          k,
-			Value:        v,
+			VectorStoreID: c.VectorStoreID,
+			Key:           k,
+			Value:         v,
 		})
 	}
 	for _, cm := range cms {
 		if err := s.store.CreateCollectionMetadata(cm); err != nil {
 			return nil, status.Errorf(codes.Internal, "create collection metadata: %s", err)
 		}
-	}
-
-	c, err = s.store.GetCollectionByCollectionID(userInfo.ProjectID, cid)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
 	return toVectorStoreProto(c, cms), nil
@@ -169,23 +171,28 @@ func (s *S) ListVectorStores(
 		return nil, status.Errorf(codes.InvalidArgument, "order must be one of 'asc' or 'desc'")
 	}
 
-	afterID := int64(-1)
-	if req.After != "" {
-		var err error
-		afterID, err = getCollectionID(req.After)
+	var afterCreatedAt time.Time
+	var afterID uint
+	if vid := req.After; vid != "" {
+		c, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, vid)
 		if err != nil {
-			return nil, err
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, status.Errorf(codes.NotFound, "invalid value of after: %q", vid)
+			}
+			return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 		}
+		afterCreatedAt = c.CreatedAt
+		afterID = c.ID
 	}
 
-	cs, hasMore, err := s.store.ListCollectionsWithPagination(userInfo.ProjectID, afterID, order, int(limit))
+	cs, hasMore, err := s.store.ListCollectionsWithPagination(userInfo.ProjectID, afterCreatedAt, afterID, order, int(limit))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list collections with pagination: %s", err)
 	}
 
 	var protos []*v1.VectorStore
 	for _, c := range cs {
-		cm, err := s.store.ListCollectionMetadataByCollectionID(c.CollectionID)
+		cm, err := s.store.ListCollectionMetadataByVectorStoreID(c.VectorStoreID)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "list collection metadata: %s", err)
 		}
@@ -220,12 +227,7 @@ func (s *S) GetVectorStore(
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
-	id, err := getCollectionID(req.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := s.store.GetCollectionByCollectionID(userInfo.ProjectID, id)
+	c, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, req.Id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Id)
@@ -233,7 +235,7 @@ func (s *S) GetVectorStore(
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
-	cm, err := s.store.ListCollectionMetadataByCollectionID(c.CollectionID)
+	cm, err := s.store.ListCollectionMetadataByVectorStoreID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list collection metadata: %s", err)
 	}
@@ -259,12 +261,7 @@ func (s *S) UpdateVectorStore(
 		return nil, err
 	}
 
-	id, err := getCollectionID(req.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := s.store.GetCollectionByCollectionID(userInfo.ProjectID, id)
+	c, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, req.Id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Id)
@@ -273,7 +270,7 @@ func (s *S) UpdateVectorStore(
 	}
 
 	// update collection metadata
-	cms, err := s.store.ListCollectionMetadataByCollectionID(c.CollectionID)
+	cms, err := s.store.ListCollectionMetadataByVectorStoreID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list collection metadata: %s", err)
 	}
@@ -286,9 +283,9 @@ func (s *S) UpdateVectorStore(
 		found, ok := cur[k]
 		if !ok {
 			cm := &store.CollectionMetadata{
-				CollectionID: c.CollectionID,
-				Key:          k,
-				Value:        v,
+				VectorStoreID: req.Id,
+				Key:           k,
+				Value:         v,
 			}
 			if err := s.store.CreateCollectionMetadata(cm); err != nil {
 				return nil, status.Errorf(codes.Internal, "create collection metadata: %s", err)
@@ -302,21 +299,18 @@ func (s *S) UpdateVectorStore(
 	}
 	for _, cm := range cms {
 		if _, ok := req.Metadata[cm.Key]; !ok {
-			if err := s.store.DeleteCollectionMetadata(cm.CollectionID, cm.Key); err != nil {
+			if err := s.store.DeleteCollectionMetadata(cm.ID); err != nil {
 				return nil, status.Errorf(codes.Internal, "delete collection metadata: %s", err)
 			}
 		}
 	}
-	cms, err = s.store.ListCollectionMetadataByCollectionID(c.CollectionID)
+	cms, err = s.store.ListCollectionMetadataByVectorStoreID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list collection metadata: %s", err)
 	}
 
 	// update collection
-	if req.Name != "" && req.Name != c.Name {
-		if err := s.vstoreClient.UpdateVectorStoreName(ctx, c.Name, req.Name); err != nil {
-			return nil, status.Errorf(codes.Internal, "update vector store: %s", err)
-		}
+	if req.Name != "" {
 		c.Name = req.Name
 	}
 	// TODO(guangrui): support clearing ExpiresAfter. Considering to use 'google.protobuf.Int32Value' to differentiate
@@ -349,29 +343,23 @@ func (s *S) DeleteVectorStore(
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
-	id, err := getCollectionID(req.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := s.store.GetCollectionByCollectionID(userInfo.ProjectID, id)
-	if err != nil {
+	if _, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, req.Id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Id)
 		}
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
-	if err := s.vstoreClient.DeleteVectorStore(ctx, c.Name); err != nil {
+	if err := s.vstoreClient.DeleteVectorStore(ctx, req.Id); err != nil {
 		return nil, status.Errorf(codes.Internal, "delete collection: %s", err)
 	}
 
 	// TODO(guangrui): Delete collection and collection metadata in a transaction.
-	if err := s.store.DeleteCollection(userInfo.ProjectID, id); err != nil {
+	if err := s.store.DeleteCollection(userInfo.ProjectID, req.Id); err != nil {
 		return nil, status.Errorf(codes.Internal, "delete collection: %s", err)
 	}
-	if err := s.store.DeleteCollectionMetadataByCollectionID(id); err != nil {
-		return nil, status.Errorf(codes.Internal, "delete collection metadata: %s", err)
+	if err := s.store.DeleteCollectionMetadatasByVectorStoreID(req.Id); err != nil {
+		return nil, status.Errorf(codes.Internal, "delete collection metadatas: %s", err)
 	}
 	return &v1.DeleteVectorStoreResponse{
 		Id:      req.Id,
@@ -387,7 +375,7 @@ func toVectorStoreProto(c *store.Collection, cms []*store.CollectionMetadata) *v
 	}
 
 	return &v1.VectorStore{
-		Id:         fmt.Sprintf("%d", c.CollectionID),
+		Id:         c.VectorStoreID,
 		Object:     vectorStoreObject,
 		CreatedAt:  c.CreatedAt.Unix(),
 		Name:       c.Name,
@@ -408,12 +396,4 @@ func toVectorStoreProto(c *store.Collection, cms []*store.CollectionMetadata) *v
 		LastActiveAt: c.LastActiveAt,
 		Metadata:     m,
 	}
-}
-
-func getCollectionID(vid string) (int64, error) {
-	id, err := strconv.ParseInt(vid, 10, 64)
-	if err != nil {
-		return 0, status.Errorf(codes.Internal, "get collection id %s", err)
-	}
-	return id, nil
 }
