@@ -8,6 +8,36 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// S3Config is the S3 configuration.
+type S3Config struct {
+	EndpointURL string `yaml:"endpointUrl"`
+	Region      string `yaml:"region"`
+	Bucket      string `yaml:"bucket"`
+	PathPrefix  string `yaml:"pathPrefix"`
+}
+
+// ObjectStoreConfig is the object store configuration.
+type ObjectStoreConfig struct {
+	S3 S3Config `yaml:"s3"`
+}
+
+// Validate validates the object store configuration.
+func (c *ObjectStoreConfig) Validate() error {
+	if c.S3.EndpointURL == "" {
+		return fmt.Errorf("s3 endpoint url must be set")
+	}
+	if c.S3.Region == "" {
+		return fmt.Errorf("s3 region must be set")
+	}
+	if c.S3.Bucket == "" {
+		return fmt.Errorf("s3 bucket must be set")
+	}
+	if c.S3.PathPrefix == "" {
+		return fmt.Errorf("s3 path prefix must be set")
+	}
+	return nil
+}
+
 // AuthConfig is the authentication configuration.
 type AuthConfig struct {
 	Enable                 bool   `yaml:"enable"`
@@ -30,9 +60,15 @@ type Config struct {
 	GRPCPort int `yaml:"grpcPort"`
 	HTTPPort int `yaml:"httpPort"`
 
-	FileManagerServerAddr string    `yaml:"fileManagerServerAddr"`
-	VectorDatabase        db.Config `yaml:"vectorDatabase"`
-	Database              db.Config `yaml:"database"`
+	OllamaServerAddr                   string            `yaml:"ollamaServerAddr"`
+	FileManagerServerAddr              string            `yaml:"fileManagerServerAddr"`
+	FileManagerServerWorkerServiceAddr string            `yaml:"fileManagerServerWorkerServiceAddr"`
+	VectorDatabase                     db.Config         `yaml:"vectorDatabase"`
+	Database                           db.Config         `yaml:"database"`
+	ObjectStore                        ObjectStoreConfig `yaml:"objectStore"`
+
+	// Model is the embedding model name.
+	Model string `yaml:"model"`
 
 	AuthConfig AuthConfig `yaml:"auth"`
 }
@@ -48,11 +84,20 @@ func (c *Config) Validate() error {
 	if c.FileManagerServerAddr == "" {
 		return fmt.Errorf("file manager address must be set")
 	}
+	if c.FileManagerServerWorkerServiceAddr == "" {
+		return fmt.Errorf("file manager server worker service address must be set")
+	}
+	if c.Model == "" {
+		c.Model = "all-minilm"
+	}
 	if err := c.VectorDatabase.Validate(); err != nil {
 		return fmt.Errorf("vector database: %s", err)
 	}
 	if err := c.Database.Validate(); err != nil {
 		return fmt.Errorf("database: %s", err)
+	}
+	if err := c.ObjectStore.Validate(); err != nil {
+		return fmt.Errorf("object store: %s", err)
 	}
 	if err := c.AuthConfig.Validate(); err != nil {
 		return err

@@ -1,0 +1,15 @@
+Tokens can be thought of as pieces of words. Before the API processes the request, the input is broken down into tokens. These tokens are not cut up exactly where the words start or end - tokens can include trailing spaces and even sub-words. Here are some helpful rules of thumb for understanding tokens in terms of lengths:
+
+    1 token ~= 4 chars in English
+
+    1 token ~= ¾ words
+
+    100 tokens ~= 75 words
+
+Or 
+
+    1-2 sentence ~= 30 tokens
+
+    1 paragraph ~= 100 tokens
+
+    1,500 words ~= 2048 tokens

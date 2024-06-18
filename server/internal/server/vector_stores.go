@@ -63,20 +63,22 @@ func (s *S) CreateVectorStore(
 		return nil, status.Errorf(codes.Internal, "generate id: %s", err)
 	}
 
-	cid, err := s.vstoreClient.CreateVectorStore(ctx, vsID)
+	cid, err := s.vstoreClient.CreateVectorStore(ctx, vsID, s.dimensions)
 	if err != nil {
 		return nil, err
 	}
 
 	c := &store.Collection{
-		VectorStoreID:  vsID,
-		CollectionID:   cid,
-		Name:           req.Name,
-		Status:         store.CollectionStatusInProgress,
-		OrganizationID: userInfo.OrganizationID,
-		ProjectID:      userInfo.ProjectID,
-		TenantID:       userInfo.TenantID,
-		LastActiveAt:   time.Now().Unix(),
+		VectorStoreID:       vsID,
+		CollectionID:        cid,
+		Name:                req.Name,
+		Status:              store.CollectionStatusInProgress,
+		OrganizationID:      userInfo.OrganizationID,
+		ProjectID:           userInfo.ProjectID,
+		TenantID:            userInfo.TenantID,
+		LastActiveAt:        time.Now().Unix(),
+		EmbeddingModel:      s.model,
+		EmbeddingDimensions: s.dimensions,
 	}
 	if ea := req.ExpiresAfter; ea != nil {
 		if err := validateExpiresAfter(ea); err != nil {

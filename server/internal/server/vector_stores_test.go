@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	fv1 "github.com/llm-operator/file-manager/api/v1"
@@ -13,12 +14,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func TestCreateVectorStore(t *testing.T) {
-	const (
-		fileID          = "file0"
-		vectorStoreName = "vector_store_1"
-	)
+const (
+	fileID          = "file0"
+	vectorStoreName = "vector_store_1"
+	modelName       = "model"
+	dimensions      = 10
+)
 
+func TestCreateVectorStore(t *testing.T) {
 	tcs := []struct {
 		name    string
 		req     *v1.CreateVectorStoreRequest
@@ -61,9 +64,17 @@ func TestCreateVectorStore(t *testing.T) {
 						fileID: true,
 					},
 				},
+				&noopFileWorkerClient{
+					ids: map[string]string{
+						fileID: "test.txt",
+					},
+				},
 				&noopVStoreClient{
 					vs: map[string]int64{},
 				},
+				&noopEmbedder{},
+				modelName,
+				dimensions,
 			)
 			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, tc.req)
@@ -79,11 +90,6 @@ func TestCreateVectorStore(t *testing.T) {
 }
 
 func TestListVectorStores(t *testing.T) {
-	const (
-		fileID          = "file0"
-		vectorStoreName = "vector_store_1"
-	)
-
 	names := []string{
 		vectorStoreName,
 		"vector_store_2",
@@ -100,9 +106,17 @@ func TestListVectorStores(t *testing.T) {
 				fileID: true,
 			},
 		},
+		&noopFileWorkerClient{
+			ids: map[string]string{
+				fileID: "test.txt",
+			},
+		},
 		&noopVStoreClient{
 			vs: map[string]int64{},
 		},
+		&noopEmbedder{},
+		modelName,
+		dimensions,
 	)
 
 	ctx := context.Background()
@@ -188,9 +202,13 @@ func TestGetVectorStores(t *testing.T) {
 	srv := New(
 		st,
 		&noopFileGetClient{},
+		&noopFileWorkerClient{},
 		&noopVStoreClient{
 			vs: map[string]int64{},
 		},
+		&noopEmbedder{},
+		modelName,
+		dimensions,
 	)
 
 	names := []string{
@@ -249,11 +267,6 @@ func TestGetVectorStores(t *testing.T) {
 }
 
 func TestDeleteVectorStore(t *testing.T) {
-	const (
-		fileID          = "file0"
-		vectorStoreName = "vector_store_1"
-	)
-
 	tcs := []struct {
 		name    string
 		req     func(id string) *v1.DeleteVectorStoreRequest
@@ -302,9 +315,17 @@ func TestDeleteVectorStore(t *testing.T) {
 						fileID: true,
 					},
 				},
+				&noopFileWorkerClient{
+					ids: map[string]string{
+						fileID: "test.txt",
+					},
+				},
 				&noopVStoreClient{
 					vs: map[string]int64{},
 				},
+				&noopEmbedder{},
+				modelName,
+				dimensions,
 			)
 			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
@@ -327,11 +348,6 @@ func TestDeleteVectorStore(t *testing.T) {
 }
 
 func TestUpdateVectorStore(t *testing.T) {
-	const (
-		fileID          = "file0"
-		vectorStoreName = "vector_store_1"
-	)
-
 	tcs := []struct {
 		name    string
 		req     func(id string) *v1.UpdateVectorStoreRequest
@@ -388,9 +404,17 @@ func TestUpdateVectorStore(t *testing.T) {
 						fileID: true,
 					},
 				},
+				&noopFileWorkerClient{
+					ids: map[string]string{
+						fileID: "test.txt",
+					},
+				},
 				&noopVStoreClient{
 					vs: map[string]int64{},
 				},
+				&noopEmbedder{},
+				modelName,
+				dimensions,
 			)
 			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
@@ -419,11 +443,26 @@ func (c *noopFileGetClient) GetFile(ctx context.Context, in *fv1.GetFileRequest,
 	return &fv1.File{}, nil
 }
 
+type noopFileWorkerClient struct {
+	ids map[string]string
+}
+
+func (c *noopFileWorkerClient) GetFilePath(ctx context.Context, in *fv1.GetFilePathRequest, opts ...grpc.CallOption) (*fv1.GetFilePathResponse, error) {
+	path, ok := c.ids[in.Id]
+	if !ok {
+		return nil, status.Error(codes.NotFound, "file not found")
+	}
+
+	return &fv1.GetFilePathResponse{
+		Path: path,
+	}, nil
+}
+
 type noopVStoreClient struct {
 	vs map[string]int64
 }
 
-func (c *noopVStoreClient) CreateVectorStore(ctx context.Context, name string) (int64, error) {
+func (c *noopVStoreClient) CreateVectorStore(ctx context.Context, name string, dimensions int) (int64, error) {
 	newID := int64(len(c.vs) + 1)
 	c.vs[name] = newID
 	return newID, nil
@@ -446,4 +485,15 @@ func (c *noopVStoreClient) ListVectorStores(ctx context.Context) ([]int64, error
 		ids = append(ids, id)
 	}
 	return ids, nil
+}
+
+type noopEmbedder struct {
+	collectionName string
+}
+
+func (c *noopEmbedder) AddFile(ctx context.Context, collectionName, modelName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error {
+	if collectionName == c.collectionName {
+		return nil
+	}
+	return fmt.Errorf("collection %s not found", collectionName)
 }

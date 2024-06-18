@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/llm-operator/common/pkg/db"
@@ -12,7 +13,10 @@ import (
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/vector-store-manager/api/v1"
 	"github.com/llm-operator/vector-store-manager/server/internal/config"
+	"github.com/llm-operator/vector-store-manager/server/internal/embedder"
 	"github.com/llm-operator/vector-store-manager/server/internal/milvus"
+	"github.com/llm-operator/vector-store-manager/server/internal/ollama"
+	"github.com/llm-operator/vector-store-manager/server/internal/s3"
 	"github.com/llm-operator/vector-store-manager/server/internal/server"
 	"github.com/llm-operator/vector-store-manager/server/internal/store"
 	"github.com/spf13/cobra"
@@ -68,11 +72,18 @@ func run(ctx context.Context, c *config.Config) error {
 		return err
 	}
 
-	conn, err := grpc.Dial(c.FileManagerServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	options := grpc.WithTransportCredentials(insecure.NewCredentials())
+	conn, err := grpc.Dial(c.FileManagerServerAddr, options)
 	if err != nil {
 		return err
 	}
 	fclient := fv1.NewFilesServiceClient(conn)
+
+	conn, err = grpc.Dial(c.FileManagerServerWorkerServiceAddr, options)
+	if err != nil {
+		return err
+	}
+	fwClient := fv1.NewFilesWorkerServiceClient(conn)
 
 	dbInst, err := db.OpenDB(c.Database)
 	if err != nil {
@@ -89,7 +100,27 @@ func run(ctx context.Context, c *config.Config) error {
 		return err
 	}
 
-	s := server.New(st, fclient, vstoreClient)
+	if err := os.Setenv("OLLAMA_HOST", c.OllamaServerAddr); err != nil {
+		return err
+	}
+	o, err := ollama.New()
+	if err != nil {
+		return err
+	}
+
+	s3Client := s3.NewClient(c.ObjectStore.S3)
+	e := embedder.New(o, s3Client, vstoreClient)
+
+	models := []string{"all-minilm", "nomic-embed-text"}
+	dimsByModels := map[string]int{
+		"all-minilm":       384,
+		"nomic-embed-text": 768,
+	}
+	dim, ok := dimsByModels[c.Model]
+	if !ok {
+		return fmt.Errorf("model must be one of: %v", models)
+	}
+	s := server.New(st, fclient, fwClient, vstoreClient, e, c.Model, dim)
 
 	errCh := make(chan error)
 	go func() {

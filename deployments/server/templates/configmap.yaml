@@ -9,6 +9,9 @@ data:
     httpPort: {{ .Values.httpPort }}
     grpcPort: {{ .Values.grpcPort }}
     fileManagerServerAddr: {{ .Values.fileManagerServerAddr }}
+    fileManagerServerWorkerServiceAddr: {{ .Values.fileManagerServerWorkerServiceAddr }}
+    ollamaServerAddr: {{ .Values.ollamaServerAddr }}
+    model: {{ .Values.model }}
     database:
       host: {{ .Values.global.database.host }}
       port: {{ .Values.global.database.port }}
@@ -21,6 +24,11 @@ data:
       database: {{ .Values.vectorDatabase.database }}
       username: {{ .Values.vectorDatabase.username }}
       passwordEnvName: VECTOR_DB_PASSWORD
+    objectStore:
+      s3:
+        endpointUrl: {{ .Values.global.objectStore.s3.endpointUrl }}
+        region: {{ .Values.global.objectStore.s3.region }}
+        bucket: {{ .Values.global.objectStore.s3.bucket }}
     auth:
       enable: {{ .Values.global.auth.enable }}
       rbacInternalServerAddr: {{ .Values.global.auth.rbacInternalServerAddr }}
