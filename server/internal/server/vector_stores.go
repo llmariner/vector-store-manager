@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -68,6 +69,9 @@ func (s *S) CreateVectorStore(
 		return nil, err
 	}
 
+	// TODO(kenji): If the RPC fails after this point, a dangling Milvus collection will be left behind.
+	// We need some background cleaning processing.
+
 	c := &store.Collection{
 		VectorStoreID:  vsID,
 		CollectionID:   cid,
@@ -86,11 +90,6 @@ func (s *S) CreateVectorStore(
 		c.ExpiresAfterDays = ea.Days
 	}
 
-	if err := s.store.CreateCollection(c); err != nil {
-		return nil, status.Errorf(codes.Internal, "create collection: %s", err)
-	}
-
-	// TODO(guangrui): Make CreateCollection and CreatCollectionMetadata in a transaction.
 	var cms []*store.CollectionMetadata
 	for k, v := range req.Metadata {
 		cms = append(cms, &store.CollectionMetadata{
@@ -99,10 +98,20 @@ func (s *S) CreateVectorStore(
 			Value:         v,
 		})
 	}
-	for _, cm := range cms {
-		if err := s.store.CreateCollectionMetadata(cm); err != nil {
-			return nil, status.Errorf(codes.Internal, "create collection metadata: %s", err)
+
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		if err := store.CreateCollectionInTransaction(tx, c); err != nil {
+			return fmt.Errorf("create collection: %s", err)
 		}
+
+		for _, cm := range cms {
+			if err := store.CreateCollectionMetadataInTransaction(tx, cm); err != nil {
+				return fmt.Errorf("create collection metadata: %s", err)
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "transaction: %s", err)
 	}
 
 	return toVectorStoreProto(c, cms), nil
@@ -257,6 +266,12 @@ func (s *S) UpdateVectorStore(
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
+	if ea := req.ExpiresAfter; ea != nil {
+		if err := validateExpiresAfter(ea); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := validateMetadata(req.Metadata); err != nil {
 		return nil, err
 	}
@@ -278,52 +293,56 @@ func (s *S) UpdateVectorStore(
 	for _, cm := range cms {
 		cur[cm.Key] = cm
 	}
-	// TODO(guangrui): Update collection and collection metadata in a transaction.
-	for k, v := range req.Metadata {
-		found, ok := cur[k]
-		if !ok {
-			cm := &store.CollectionMetadata{
-				VectorStoreID: req.Id,
-				Key:           k,
-				Value:         v,
-			}
-			if err := s.store.CreateCollectionMetadata(cm); err != nil {
-				return nil, status.Errorf(codes.Internal, "create collection metadata: %s", err)
-			}
-		} else if found.Value != v {
-			found.Value = v
-			if err := s.store.UpdateCollectionMetadata(found); err != nil {
-				return nil, status.Errorf(codes.Internal, "update collection metadata: %s", err)
-			}
-		}
-	}
-	for _, cm := range cms {
-		if _, ok := req.Metadata[cm.Key]; !ok {
-			if err := s.store.DeleteCollectionMetadata(cm.ID); err != nil {
-				return nil, status.Errorf(codes.Internal, "delete collection metadata: %s", err)
+
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		for k, v := range req.Metadata {
+			found, ok := cur[k]
+			if !ok {
+				cm := &store.CollectionMetadata{
+					VectorStoreID: req.Id,
+					Key:           k,
+					Value:         v,
+				}
+				if err := store.CreateCollectionMetadataInTransaction(tx, cm); err != nil {
+					return fmt.Errorf("create collection metadata: %s", err)
+				}
+			} else if found.Value != v {
+				found.Value = v
+				if err := store.UpdateCollectionMetadataInTransaction(tx, found); err != nil {
+					return fmt.Errorf("update collection metadata: %s", err)
+				}
 			}
 		}
+		for _, cm := range cms {
+			if _, ok := req.Metadata[cm.Key]; !ok {
+				if err := store.DeleteCollectionMetadataInTransaction(tx, cm.ID); err != nil {
+					return fmt.Errorf("delete collection metadata: %s", err)
+				}
+			}
+		}
+
+		// Update collection.
+
+		if req.Name != "" {
+			c.Name = req.Name
+		}
+		// TODO(guangrui): support clearing ExpiresAfter. Considering to use 'google.protobuf.Int32Value' to differentiate
+		// between clearing and unsetting.
+		if ea := req.ExpiresAfter; ea != nil {
+			c.Anchor = store.ExpiresAfterAnchor(ea.Anchor)
+			c.ExpiresAfterDays = ea.Days
+		}
+		if err := store.UpdateCollectionInTransaction(tx, c); err != nil {
+			return fmt.Errorf("update collection: %s", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "transaction: %s", err)
 	}
+
 	cms, err = s.store.ListCollectionMetadataByVectorStoreID(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list collection metadata: %s", err)
-	}
-
-	// update collection
-	if req.Name != "" {
-		c.Name = req.Name
-	}
-	// TODO(guangrui): support clearing ExpiresAfter. Considering to use 'google.protobuf.Int32Value' to differentiate
-	// between clearing and unsetting.
-	if ea := req.ExpiresAfter; ea != nil {
-		if err := validateExpiresAfter(ea); err != nil {
-			return nil, err
-		}
-		c.Anchor = store.ExpiresAfterAnchor(ea.Anchor)
-		c.ExpiresAfterDays = ea.Days
-	}
-	if err := s.store.UpdateCollection(c); err != nil {
-		return nil, status.Errorf(codes.Internal, "update collection: %s", err)
 	}
 
 	return toVectorStoreProto(c, cms), nil
@@ -350,17 +369,25 @@ func (s *S) DeleteVectorStore(
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
+	if err := s.store.Transaction(func(tx *gorm.DB) error {
+		if err := store.DeleteCollectionInTransaction(tx, userInfo.ProjectID, req.Id); err != nil {
+			return fmt.Errorf("delete collection: %s", err)
+		}
+		if err := store.DeleteCollectionMetadatasByVectorStoreIDInTransaction(tx, req.Id); err != nil {
+			return fmt.Errorf("delete collection metadatas: %s", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "transaction: %s", err)
+	}
+
+	// TODO(kenji): If the RPC fails after this point, a dangling Milvus collection will be left behind.
+	// We need some background cleaning processing.
+
 	if err := s.vstoreClient.DeleteVectorStore(ctx, req.Id); err != nil {
 		return nil, status.Errorf(codes.Internal, "delete collection: %s", err)
 	}
 
-	// TODO(guangrui): Delete collection and collection metadata in a transaction.
-	if err := s.store.DeleteCollection(userInfo.ProjectID, req.Id); err != nil {
-		return nil, status.Errorf(codes.Internal, "delete collection: %s", err)
-	}
-	if err := s.store.DeleteCollectionMetadatasByVectorStoreID(req.Id); err != nil {
-		return nil, status.Errorf(codes.Internal, "delete collection metadatas: %s", err)
-	}
 	return &v1.DeleteVectorStoreResponse{
 		Id:      req.Id,
 		Object:  vectorStoreObject,

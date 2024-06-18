@@ -21,7 +21,12 @@ type CollectionMetadata struct {
 
 // CreateCollectionMetadata creates a new collection metadata.
 func (s *S) CreateCollectionMetadata(cm *CollectionMetadata) error {
-	if err := s.db.Create(cm).Error; err != nil {
+	return CreateCollectionMetadataInTransaction(s.db, cm)
+}
+
+// CreateCollectionMetadataInTransaction creates a new collection metadata.
+func CreateCollectionMetadataInTransaction(tx *gorm.DB, cm *CollectionMetadata) error {
+	if err := tx.Create(cm).Error; err != nil {
 		return err
 	}
 	return nil
@@ -38,7 +43,12 @@ func (s *S) ListCollectionMetadataByVectorStoreID(vectorStoreID string) ([]*Coll
 
 // UpdateCollectionMetadata updates the metadata of a collection.
 func (s *S) UpdateCollectionMetadata(cm *CollectionMetadata) error {
-	result := s.db.Model(&CollectionMetadata{}).
+	return UpdateCollectionMetadataInTransaction(s.db, cm)
+}
+
+// UpdateCollectionMetadataInTransaction updates the metadata of a collection.
+func UpdateCollectionMetadataInTransaction(tx *gorm.DB, cm *CollectionMetadata) error {
+	result := tx.Model(&CollectionMetadata{}).
 		Where("id = ?", cm.ID).
 		Where("version = ?", cm.Version).
 		Where("key = ?", cm.Key).
@@ -57,7 +67,12 @@ func (s *S) UpdateCollectionMetadata(cm *CollectionMetadata) error {
 
 // DeleteCollectionMetadata deletes the metadata for the collection.
 func (s *S) DeleteCollectionMetadata(id uint) error {
-	result := s.db.Unscoped().
+	return DeleteCollectionMetadataInTransaction(s.db, id)
+}
+
+// DeleteCollectionMetadataInTransaction deletes the metadata for the collection.
+func DeleteCollectionMetadataInTransaction(tx *gorm.DB, id uint) error {
+	result := tx.Unscoped().
 		Where("id = ?", id).
 		Delete(&CollectionMetadata{})
 	if err := result.Error; err != nil {
@@ -71,7 +86,12 @@ func (s *S) DeleteCollectionMetadata(id uint) error {
 
 // DeleteCollectionMetadatasByVectorStoreID deletes all metadata of the collection.
 func (s *S) DeleteCollectionMetadatasByVectorStoreID(vectorStoreID string) error {
-	if err := s.db.Unscoped().
+	return DeleteCollectionMetadatasByVectorStoreIDInTransaction(s.db, vectorStoreID)
+}
+
+// DeleteCollectionMetadatasByVectorStoreIDInTransaction deletes all metadata of the collection.
+func DeleteCollectionMetadatasByVectorStoreIDInTransaction(tx *gorm.DB, vectorStoreID string) error {
+	if err := tx.Unscoped().
 		Where("vector_store_id = ?", vectorStoreID).
 		Delete(&CollectionMetadata{}).Error; err != nil {
 		return err
