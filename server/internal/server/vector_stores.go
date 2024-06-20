@@ -364,19 +364,19 @@ func (s *S) DeleteVectorStore(
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
-	if _, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, req.Id); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Id)
-		}
-		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
+	if err := s.validateVectorStore(req.Id, userInfo.ProjectID); err != nil {
+		return nil, err
 	}
 
 	if err := s.store.Transaction(func(tx *gorm.DB) error {
 		if err := store.DeleteCollectionInTransaction(tx, userInfo.ProjectID, req.Id); err != nil {
 			return fmt.Errorf("delete collection: %s", err)
 		}
-		if err := store.DeleteCollectionMetadatasByVectorStoreIDInTransaction(tx, req.Id); err != nil {
+		if err := store.DeleteAllCollectionMetadatasByVectorStoreIDInTransaction(tx, req.Id); err != nil {
 			return fmt.Errorf("delete collection metadatas: %s", err)
+		}
+		if err := store.DeleteAllFilesByVectorStoreIDInTransaction(tx, req.Id); err != nil {
+			return fmt.Errorf("delete files: %s", err)
 		}
 		return nil
 	}); err != nil {
@@ -425,4 +425,15 @@ func toVectorStoreProto(c *store.Collection, cms []*store.CollectionMetadata) *v
 		LastActiveAt: c.LastActiveAt,
 		Metadata:     m,
 	}
+}
+
+// validateVectorStore checks if the specified vector is visible to the user.
+func (s *S) validateVectorStore(vectorStoreID, projectID string) error {
+	if _, err := s.store.GetCollectionByVectorStoreID(projectID, vectorStoreID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return status.Errorf(codes.NotFound, "collection %q not found", vectorStoreID)
+		}
+		return status.Errorf(codes.Internal, "get collection: %s", err)
+	}
+	return nil
 }

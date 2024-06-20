@@ -73,13 +73,13 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 
 	options := grpc.WithTransportCredentials(insecure.NewCredentials())
-	conn, err := grpc.Dial(c.FileManagerServerAddr, options)
+	conn, err := grpc.NewClient(c.FileManagerServerAddr, options)
 	if err != nil {
 		return err
 	}
 	fclient := fv1.NewFilesServiceClient(conn)
 
-	conn, err = grpc.Dial(c.FileManagerServerWorkerServiceAddr, options)
+	conn, err = grpc.NewClient(c.FileManagerServerWorkerServiceAddr, options)
 	if err != nil {
 		return err
 	}
@@ -111,14 +111,9 @@ func run(ctx context.Context, c *config.Config) error {
 	s3Client := s3.NewClient(c.ObjectStore.S3)
 	e := embedder.New(o, s3Client, vstoreClient)
 
-	models := []string{"all-minilm", "nomic-embed-text"}
-	dimsByModels := map[string]int{
-		"all-minilm":       384,
-		"nomic-embed-text": 768,
-	}
-	dim, ok := dimsByModels[c.Model]
-	if !ok {
-		return fmt.Errorf("model must be one of: %v", models)
+	dim, err := ollama.Dimension(c.Model)
+	if err != nil {
+		return err
 	}
 	s := server.New(st, fclient, fwClient, vstoreClient, e, c.Model, dim)
 

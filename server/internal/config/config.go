@@ -13,7 +13,6 @@ type S3Config struct {
 	EndpointURL string `yaml:"endpointUrl"`
 	Region      string `yaml:"region"`
 	Bucket      string `yaml:"bucket"`
-	PathPrefix  string `yaml:"pathPrefix"`
 }
 
 // ObjectStoreConfig is the object store configuration.
@@ -31,9 +30,6 @@ func (c *ObjectStoreConfig) Validate() error {
 	}
 	if c.S3.Bucket == "" {
 		return fmt.Errorf("s3 bucket must be set")
-	}
-	if c.S3.PathPrefix == "" {
-		return fmt.Errorf("s3 path prefix must be set")
 	}
 	return nil
 }
@@ -60,12 +56,13 @@ type Config struct {
 	GRPCPort int `yaml:"grpcPort"`
 	HTTPPort int `yaml:"httpPort"`
 
-	OllamaServerAddr                   string            `yaml:"ollamaServerAddr"`
-	FileManagerServerAddr              string            `yaml:"fileManagerServerAddr"`
-	FileManagerServerWorkerServiceAddr string            `yaml:"fileManagerServerWorkerServiceAddr"`
-	VectorDatabase                     db.Config         `yaml:"vectorDatabase"`
-	Database                           db.Config         `yaml:"database"`
-	ObjectStore                        ObjectStoreConfig `yaml:"objectStore"`
+	OllamaServerAddr                   string `yaml:"ollamaServerAddr"`
+	FileManagerServerAddr              string `yaml:"fileManagerServerAddr"`
+	FileManagerServerWorkerServiceAddr string `yaml:"fileManagerServerWorkerServiceAddr"`
+
+	VectorDatabase db.Config         `yaml:"vectorDatabase"`
+	Database       db.Config         `yaml:"database"`
+	ObjectStore    ObjectStoreConfig `yaml:"objectStore"`
 
 	// Model is the embedding model name.
 	Model string `yaml:"model"`
@@ -81,6 +78,9 @@ func (c *Config) Validate() error {
 	if c.HTTPPort <= 0 {
 		return fmt.Errorf("httpPort must be greater than 0")
 	}
+	if c.OllamaServerAddr == "" {
+		return fmt.Errorf("ollama server addr must be set")
+	}
 	if c.FileManagerServerAddr == "" {
 		return fmt.Errorf("file manager address must be set")
 	}
@@ -88,7 +88,7 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("file manager server worker service address must be set")
 	}
 	if c.Model == "" {
-		c.Model = "all-minilm"
+		return fmt.Errorf("model must be set")
 	}
 	if err := c.VectorDatabase.Validate(); err != nil {
 		return fmt.Errorf("vector database: %s", err)

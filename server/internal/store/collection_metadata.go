@@ -84,13 +84,13 @@ func DeleteCollectionMetadataInTransaction(tx *gorm.DB, id uint) error {
 	return nil
 }
 
-// DeleteCollectionMetadatasByVectorStoreID deletes all metadata of the collection.
-func (s *S) DeleteCollectionMetadatasByVectorStoreID(vectorStoreID string) error {
-	return DeleteCollectionMetadatasByVectorStoreIDInTransaction(s.db, vectorStoreID)
+// DeleteAllCollectionMetadatasByVectorStoreID deletes all metadata of the collection.
+func (s *S) DeleteAllCollectionMetadatasByVectorStoreID(vectorStoreID string) error {
+	return DeleteAllCollectionMetadatasByVectorStoreIDInTransaction(s.db, vectorStoreID)
 }
 
-// DeleteCollectionMetadatasByVectorStoreIDInTransaction deletes all metadata of the collection.
-func DeleteCollectionMetadatasByVectorStoreIDInTransaction(tx *gorm.DB, vectorStoreID string) error {
+// DeleteAllCollectionMetadatasByVectorStoreIDInTransaction deletes all metadata of the collection.
+func DeleteAllCollectionMetadatasByVectorStoreIDInTransaction(tx *gorm.DB, vectorStoreID string) error {
 	if err := tx.Unscoped().
 		Where("vector_store_id = ?", vectorStoreID).
 		Delete(&CollectionMetadata{}).Error; err != nil {

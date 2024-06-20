@@ -2,6 +2,8 @@ package embedder
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +12,7 @@ import (
 
 func TestAddFile(t *testing.T) {
 	const (
-		filePath           = "../../testdata/test.txt"
+		filePath           = "testdata/test.txt"
 		collectionName0    = "collection0"
 		vectorStoreName    = "vector_store_1"
 		embeddingModel     = "model1"
@@ -67,7 +69,7 @@ func TestSplitFile(t *testing.T) {
 	}{
 		{
 			name:               "text",
-			path:               "../../testdata/test.txt",
+			path:               "testdata/test.txt",
 			chunkSizeTokens:    5,
 			chunkOverlapTokens: 2,
 			exp: []schema.Document{
@@ -97,4 +99,44 @@ func TestSplitFile(t *testing.T) {
 		})
 	}
 
+}
+
+type noopLLMClient struct {
+	// e is keyed by prompt
+	e map[string][]float64
+}
+
+func (c *noopLLMClient) Embed(ctx context.Context, modelName, prompt string) ([]float64, error) {
+	e, ok := c.e[prompt]
+	if !ok {
+		return nil, fmt.Errorf("no embedding found")
+	}
+	return e, nil
+}
+
+func (c *noopLLMClient) PullModel(ctx context.Context, modelName string) error {
+	return nil
+}
+
+// noopS3Client is a no-op S3 client.
+type noopS3Client struct{}
+
+// Download is a no-op implementation of Download
+func (n *noopS3Client) Download(w io.WriterAt, key string) error {
+	return nil
+}
+
+type noopVStoreClient struct {
+	collectionName string
+}
+
+func (c *noopVStoreClient) InsertDocuments(
+	ctx context.Context,
+	collectionName string,
+	vectors [][]float32,
+) error {
+	if collectionName != c.collectionName {
+		return fmt.Errorf("collection %s not found", collectionName)
+	}
+	return nil
 }
