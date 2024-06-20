@@ -30,5 +30,6 @@ func autoMigrate(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&Collection{},
 		&CollectionMetadata{},
+		&File{},
 	)
 }

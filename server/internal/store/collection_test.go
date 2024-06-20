@@ -50,7 +50,7 @@ func TestCreateAndGetCollection(t *testing.T) {
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
 
-func TestCreateAndListJobs(t *testing.T) {
+func TestCreateAndListCollections(t *testing.T) {
 	st, teardown := NewTest(t)
 	defer teardown()
 

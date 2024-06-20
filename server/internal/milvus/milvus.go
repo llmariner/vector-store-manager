@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	defaultShardNum   = 1
-	defaultDimensions = 512
+	defaultShardNum = 1
+	vectorColName   = "vector"
 )
 
 // S wraps Milvus client.
@@ -44,7 +44,7 @@ func New(ctx context.Context, cfg db.Config) (*S, error) {
 }
 
 // CreateVectorStore creates a new collection in milvus.
-func (s *S) CreateVectorStore(ctx context.Context, name string) (int64, error) {
+func (s *S) CreateVectorStore(ctx context.Context, name string, dimensions int) (int64, error) {
 	schema := &entity.Schema{
 		CollectionName: name,
 		AutoID:         true,
@@ -56,10 +56,10 @@ func (s *S) CreateVectorStore(ctx context.Context, name string) (int64, error) {
 				PrimaryKey: true,
 			},
 			{
-				Name:     "vector",
+				Name:     vectorColName,
 				DataType: entity.FieldTypeFloatVector,
 				TypeParams: map[string]string{
-					entity.TypeParamDim: strconv.Itoa(defaultDimensions),
+					entity.TypeParamDim: strconv.Itoa(dimensions),
 				},
 			},
 		},
@@ -99,4 +99,13 @@ func (s *S) UpdateVectorStoreName(ctx context.Context, oldName, newName string) 
 // DeleteVectorStore deletes a collection in milvus.
 func (s *S) DeleteVectorStore(ctx context.Context, name string) error {
 	return s.client.DropCollection(ctx, name)
+}
+
+// InsertDocuments inserts documents into a collection in milvus.
+func (s *S) InsertDocuments(ctx context.Context, name string, vectors [][]float32) error {
+	vectorCol := entity.NewColumnFloatVector(vectorColName, len(vectors[0]), vectors)
+	if _, err := s.client.Insert(ctx, name, "", vectorCol); err != nil {
+		return err
+	}
+	return nil
 }

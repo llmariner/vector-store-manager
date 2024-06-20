@@ -30,22 +30,38 @@ type fileGetClient interface {
 	GetFile(ctx context.Context, in *fv1.GetFileRequest, opts ...grpc.CallOption) (*fv1.File, error)
 }
 
+type fileWorkerClient interface {
+	GetFilePath(ctx context.Context, in *fv1.GetFilePathRequest, opts ...grpc.CallOption) (*fv1.GetFilePathResponse, error)
+}
+
 type vstoreClient interface {
-	CreateVectorStore(ctx context.Context, name string) (int64, error)
+	CreateVectorStore(ctx context.Context, name string, dimensions int) (int64, error)
 	DeleteVectorStore(ctx context.Context, name string) error
 	ListVectorStores(ctx context.Context) ([]int64, error)
+}
+
+type embedder interface {
+	AddFile(ctx context.Context, collectionName, modelName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error
 }
 
 // New creates a server.
 func New(
 	store *store.S,
 	fileGetClient fileGetClient,
+	fileWorkerClient fileWorkerClient,
 	vstoreClient vstoreClient,
+	e embedder,
+	model string,
+	dimensions int,
 ) *S {
 	return &S{
-		store:         store,
-		fileGetClient: fileGetClient,
-		vstoreClient:  vstoreClient,
+		store:            store,
+		fileGetClient:    fileGetClient,
+		fileWorkerClient: fileWorkerClient,
+		vstoreClient:     vstoreClient,
+		embedder:         e,
+		model:            model,
+		dimensions:       dimensions,
 	}
 }
 
@@ -53,10 +69,15 @@ func New(
 type S struct {
 	v1.UnimplementedVectorStoreServiceServer
 
-	fileGetClient fileGetClient
-	vstoreClient  vstoreClient
-	store         *store.S
-	srv           *grpc.Server
+	model      string
+	dimensions int
+	embedder   embedder
+
+	fileWorkerClient fileWorkerClient
+	fileGetClient    fileGetClient
+	vstoreClient     vstoreClient
+	store            *store.S
+	srv              *grpc.Server
 
 	enableAuth bool
 }
