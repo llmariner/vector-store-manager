@@ -29,16 +29,16 @@ const (
 type Collection struct {
 	gorm.Model
 
+	TenantID       string
+	OrganizationID string
+	ProjectID      string `gorm:"uniqueIndex:idx_collection_project_id_name"`
+
 	// VectorStoreID is the ID of the vector store that is externally visible in the API.
 	// This is also used as the name of the Milvus collection.
 	VectorStoreID string `gorm:"uniqueIndex"`
 
 	// CollectionID is the ID of the Milvus collection.
 	CollectionID int64 `gorm:"uniqueIndex"`
-
-	TenantID       string
-	OrganizationID string
-	ProjectID      string `gorm:"uniqueIndex:idx_collection_project_id_name"`
 
 	Name string `gorm:"uniqueIndex:idx_collection_project_id_name"`
 
