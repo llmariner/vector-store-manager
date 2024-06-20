@@ -96,7 +96,7 @@ func TestDeleteCollectionMetadata(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(got))
 
-	err = st.DeleteCollectionMetadatasByVectorStoreID(vectorStoreID)
+	err = st.DeleteAllCollectionMetadatasByVectorStoreID(vectorStoreID)
 	assert.NoError(t, err)
 
 	err = st.DeleteCollectionMetadata(cms[1].ID)

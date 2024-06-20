@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"strings"
+	"time"
 
 	fv1 "github.com/llm-operator/file-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
@@ -41,6 +42,26 @@ func (s *S) CreateVectorStoreFile(
 		return nil, status.Error(codes.InvalidArgument, "file id is required")
 	}
 
+	maxChunkSizeTokens := defaultMaxChunkSizeTokens
+	chunkOverlapTokens := defaultChunkOverlapTokens
+	if cs := req.ChunkingStrategy; cs != nil {
+		if err := validateChunkingStrategy(cs); err != nil {
+			return nil, err
+		}
+		if cs.Static != nil {
+			maxChunkSizeTokens = cs.Static.MaxChunkSizeTokens
+			chunkOverlapTokens = cs.Static.ChunkOverlapTokens
+		}
+	} else {
+		// TODO(kenji): The OpenAI API reference says the strategy is always "static".
+		// https://platform.openai.com/docs/api-reference/vector-stores-files/file-object
+		//
+		// We might need to do the conversion.
+		req.ChunkingStrategy = &v1.ChunkingStrategy{
+			Type: string(store.ChunkingStrategyTypeAuto),
+		}
+	}
+
 	// Pass the Authorization to the context for downstream gRPC calls.
 	ctx = auth.CarryMetadata(ctx)
 
@@ -62,27 +83,10 @@ func (s *S) CreateVectorStoreFile(
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
-	maxChunkSizeTokens := defaultMaxChunkSizeTokens
-	chunkOverlapTokens := defaultChunkOverlapTokens
-	if cs := req.ChunkingStrategy; cs != nil {
-		if err := validateChunkingStrategy(cs); err != nil {
-			return nil, err
-		}
-		if cs.Static != nil {
-			maxChunkSizeTokens = cs.Static.MaxChunkSizeTokens
-			chunkOverlapTokens = cs.Static.ChunkOverlapTokens
-		}
-	} else {
-		req.ChunkingStrategy = &v1.ChunkingStrategy{
-			Type: string(store.ChunkingStrategyTypeAuto),
-		}
-	}
-
+	log.Printf("Added file %q to vector store %q.\n", req.FileId, req.VectorStoreId)
 	if err := s.embedder.AddFile(ctx, c.Name, c.EmbeddingModel, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
 		return nil, status.Errorf(codes.Internal, "add file: %s", err)
 	}
-	log.Printf("Added file %q to vector store %q.\n", req.FileId, req.VectorStoreId)
-
 	f := &store.File{
 		FileID:               req.FileId,
 		VectorStoreID:        req.VectorStoreId,
@@ -91,19 +95,12 @@ func (s *S) CreateVectorStoreFile(
 		ChunkingStrategyType: store.ChunkingStrategyType(req.ChunkingStrategy.Type),
 		MaxChunkSizeTokens:   maxChunkSizeTokens,
 		ChunkOverlapTokens:   chunkOverlapTokens,
-		OrganizationID:       userInfo.OrganizationID,
-		ProjectID:            userInfo.ProjectID,
-		TenantID:             userInfo.TenantID,
 	}
 	if err := s.store.CreateFile(f); err != nil {
 		return nil, status.Errorf(codes.Internal, "create file: %s", err)
 	}
 	log.Printf("Added file %q to vector store %q", f.FileID, f.VectorStoreID)
 
-	f, err = s.store.GetFileByFileID(userInfo.ProjectID, req.VectorStoreId, req.FileId)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get file: %s", err)
-	}
 	return toVectorStoreFileProto(f), nil
 }
 
@@ -146,7 +143,11 @@ func (s *S) GetVectorStoreFile(
 		return nil, status.Error(codes.InvalidArgument, "file id is required")
 	}
 
-	f, err := s.store.GetFileByFileID(userInfo.ProjectID, req.VectorStoreId, req.FileId)
+	if err := s.validateVectorStore(req.VectorStoreId, userInfo.ProjectID); err != nil {
+		return nil, err
+	}
+
+	f, err := s.store.GetFileByFileID(req.VectorStoreId, req.FileId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "file %q not found in vector store %q", req.FileId, req.VectorStoreId)
@@ -172,6 +173,11 @@ func (s *S) ListVectorStoreFiles(
 	if req.Limit < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "limit must be non-negative")
 	}
+
+	if err := s.validateVectorStore(req.VectorStoreId, userInfo.ProjectID); err != nil {
+		return nil, err
+	}
+
 	limit := req.Limit
 	if limit == 0 {
 		limit = defaultPageSize
@@ -185,7 +191,21 @@ func (s *S) ListVectorStoreFiles(
 		return nil, status.Errorf(codes.InvalidArgument, "order must be one of 'asc' or 'desc'")
 	}
 
-	fs, hasMore, err := s.store.ListFilesWithPagination(userInfo.ProjectID, req.VectorStoreId, req.After, order, int(limit))
+	var afterCreatedAt time.Time
+	var afterID uint
+	if fid := req.After; fid != "" {
+		f, err := s.store.GetFileByFileID(req.VectorStoreId, fid)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, status.Errorf(codes.NotFound, "invalid value of after: %q", fid)
+			}
+			return nil, status.Errorf(codes.Internal, "get file: %s", err)
+		}
+		afterCreatedAt = f.CreatedAt
+		afterID = f.ID
+	}
+
+	fs, hasMore, err := s.store.ListFilesWithPagination(req.VectorStoreId, afterCreatedAt, afterID, order, int(limit))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "list files with pagination: %s", err)
 	}
@@ -226,7 +246,14 @@ func (s *S) DeleteVectorStoreFile(
 		return nil, status.Error(codes.InvalidArgument, "file id is required")
 	}
 
-	if err := s.store.DeleteFile(userInfo.ProjectID, req.VectorStoreId, req.FileId); err != nil {
+	if err := s.validateVectorStore(req.VectorStoreId, userInfo.ProjectID); err != nil {
+		return nil, err
+	}
+
+	if err := s.store.DeleteFile(req.VectorStoreId, req.FileId); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "file %q not found in vector store %q", req.FileId, req.VectorStoreId)
+		}
 		return nil, status.Errorf(codes.Internal, "delete file: %s", err)
 	}
 	return &v1.DeleteVectorStoreFileResponse{

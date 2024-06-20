@@ -37,22 +37,6 @@ type Client struct {
 	bucket string
 }
 
-// Upload uploads the data that buf contains to a S3 object.
-func (c *Client) Upload(r io.Reader, key string) error {
-	uploader := s3manager.NewUploaderWithClient(c.svc, func(u *s3manager.Uploader) {
-		u.PartSize = partMiBs * 1024 * 1024
-	})
-	_, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(c.bucket),
-		Key:    aws.String(key),
-		Body:   r,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // Download downloads a S3 object and writes it to w.
 func (c *Client) Download(w io.WriterAt, key string) error {
 	downloader := s3manager.NewDownloaderWithClient(c.svc, func(d *s3manager.Downloader) {

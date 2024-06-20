@@ -104,7 +104,7 @@ func (s *S) DeleteVectorStore(ctx context.Context, name string) error {
 // InsertDocuments inserts documents into a collection in milvus.
 func (s *S) InsertDocuments(ctx context.Context, name string, vectors [][]float32) error {
 	vectorCol := entity.NewColumnFloatVector(vectorColName, len(vectors[0]), vectors)
-	if _, err := s.client.Insert(ctx, name, "", vectorCol); err != nil {
+	if _, err := s.client.Insert(ctx, name, "" /* partitionName */, vectorCol); err != nil {
 		return err
 	}
 	return nil

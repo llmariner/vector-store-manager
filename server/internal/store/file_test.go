@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -15,8 +16,7 @@ func TestCreateAndGetFile(t *testing.T) {
 
 	fileID := "file0"
 	vectorStoreID := "vector_store_0"
-	project := "project0"
-	_, err := st.GetFileByFileID(project, vectorStoreID, fileID)
+	_, err := st.GetFileByFileID(vectorStoreID, fileID)
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 
@@ -24,17 +24,16 @@ func TestCreateAndGetFile(t *testing.T) {
 		FileID:        fileID,
 		VectorStoreID: vectorStoreID,
 		Status:        FileStatusCompleted,
-		ProjectID:     project,
 	}
 	err = st.CreateFile(f)
 	assert.NoError(t, err)
 
-	got, err := st.GetFileByFileID(project, vectorStoreID, fileID)
+	got, err := st.GetFileByFileID(vectorStoreID, fileID)
 	assert.NoError(t, err)
 	assert.Equal(t, fileID, got.FileID)
 
-	// Different tenant.
-	_, err = st.GetFileByFileID("unknow", vectorStoreID, fileID)
+	// Different vector store.
+	_, err = st.GetFileByFileID("different", fileID)
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
 }
@@ -46,7 +45,6 @@ func TestCreateAndListFiles(t *testing.T) {
 	const (
 		fileID        = "fileID"
 		vectorStoreID = "vector_store_0"
-		project       = "project0"
 	)
 
 	for i := 0; i < 3; i++ {
@@ -54,7 +52,6 @@ func TestCreateAndListFiles(t *testing.T) {
 			FileID:        fmt.Sprintf("%s%d", fileID, i),
 			VectorStoreID: vectorStoreID,
 			Status:        FileStatusCompleted,
-			ProjectID:     project,
 		}
 		err := st.CreateFile(&f)
 		assert.NoError(t, err)
@@ -64,13 +61,12 @@ func TestCreateAndListFiles(t *testing.T) {
 			FileID:        fmt.Sprintf("%s%d", fileID, i),
 			VectorStoreID: "unknown",
 			Status:        FileStatusCompleted,
-			ProjectID:     project,
 		}
 		err := st.CreateFile(&f)
 		assert.NoError(t, err)
 	}
 
-	got, err := st.ListFiles(project, vectorStoreID)
+	got, err := st.ListFiles(vectorStoreID)
 	assert.NoError(t, err)
 	assert.Len(t, got, 3)
 }
@@ -82,7 +78,6 @@ func TestListFilesWithPagination(t *testing.T) {
 	const (
 		fileID        = "file"
 		vectorStoreID = "vs0"
-		project       = "project0"
 	)
 
 	for i := 0; i < 10; i++ {
@@ -90,13 +85,12 @@ func TestListFilesWithPagination(t *testing.T) {
 			FileID:        fmt.Sprintf("%s%d", fileID, i),
 			VectorStoreID: vectorStoreID,
 			Status:        FileStatusCompleted,
-			ProjectID:     project,
 		}
 		err := st.CreateFile(&f)
 		assert.NoError(t, err)
 	}
 
-	got, hasMore, err := st.ListFilesWithPagination(project, vectorStoreID, "zzz", "desc", 5)
+	got, hasMore, err := st.ListFilesWithPagination(vectorStoreID, time.Time{}, 0, "desc", 5)
 	assert.NoError(t, err)
 	assert.True(t, hasMore)
 	assert.Len(t, got, 5)
@@ -105,7 +99,7 @@ func TestListFilesWithPagination(t *testing.T) {
 		assert.Equal(t, fmt.Sprintf("%s%d", fileID, want[i]), f.FileID)
 	}
 
-	got, hasMore, err = st.ListFilesWithPagination(project, vectorStoreID, got[4].FileID, "", 2)
+	got, hasMore, err = st.ListFilesWithPagination(vectorStoreID, got[4].CreatedAt, got[4].ID, "", 2)
 	assert.NoError(t, err)
 	assert.True(t, hasMore)
 	assert.Len(t, got, 2)
@@ -114,7 +108,7 @@ func TestListFilesWithPagination(t *testing.T) {
 		assert.Equal(t, fmt.Sprintf("%s%d", fileID, want[i]), f.FileID)
 	}
 
-	got, hasMore, err = st.ListFilesWithPagination(project, vectorStoreID, got[1].FileID, "", 3)
+	got, hasMore, err = st.ListFilesWithPagination(vectorStoreID, got[1].CreatedAt, got[1].ID, "", 3)
 	assert.NoError(t, err)
 	assert.False(t, hasMore)
 	assert.Len(t, got, 3)
@@ -123,7 +117,7 @@ func TestListFilesWithPagination(t *testing.T) {
 		assert.Equal(t, fmt.Sprintf("%s%d", fileID, want[i]), f.FileID)
 	}
 
-	got, hasMore, err = st.ListFilesWithPagination(project, vectorStoreID, "", "asc", 3)
+	got, hasMore, err = st.ListFilesWithPagination(vectorStoreID, time.Time{}, 0, "asc", 3)
 	assert.NoError(t, err)
 	assert.True(t, hasMore)
 	assert.Len(t, got, 3)
@@ -140,22 +134,59 @@ func TestDeleteFile(t *testing.T) {
 	const (
 		fileID        = "file0"
 		vectorStoreID = "vs0"
-		project       = "project0"
 	)
 
 	f := File{
 		FileID:        fileID,
 		VectorStoreID: vectorStoreID,
 		Status:        FileStatusCompleted,
-		ProjectID:     project,
 	}
 	err := st.CreateFile(&f)
 	assert.NoError(t, err)
 
-	err = st.DeleteFile(project, vectorStoreID, fileID)
+	err = st.DeleteFile(vectorStoreID, fileID)
 	assert.NoError(t, err)
 
-	_, err = st.GetFileByFileID(project, vectorStoreID, fileID)
+	_, err = st.GetFileByFileID(vectorStoreID, fileID)
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
+}
+
+func TestDeleteAllFilesByVectorStoreID(t *testing.T) {
+	st, teardown := NewTest(t)
+	defer teardown()
+
+	const (
+		fileID         = "file0"
+		vectorStoreID0 = "vs0"
+		vectorStoreID1 = "vs1"
+	)
+
+	f0 := File{
+		FileID:        fileID,
+		VectorStoreID: vectorStoreID0,
+	}
+	err := st.CreateFile(&f0)
+	assert.NoError(t, err)
+
+	f1 := File{
+		FileID:        fileID,
+		VectorStoreID: vectorStoreID1,
+	}
+	err = st.CreateFile(&f1)
+	assert.NoError(t, err)
+
+	err = st.DeleteAllFilesByVectorStoreID(vectorStoreID0)
+	assert.NoError(t, err)
+
+	_, err = st.GetFileByFileID(vectorStoreID0, fileID)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
+
+	_, err = st.GetFileByFileID(vectorStoreID0, fileID)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, gorm.ErrRecordNotFound))
+
+	_, err = st.GetFileByFileID(vectorStoreID1, fileID)
+	assert.NoError(t, err)
 }

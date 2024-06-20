@@ -22,59 +22,23 @@ type llmClient interface {
 	PullModel(ctx context.Context, modelName string) error
 }
 
-type noopLLMClient struct {
-	// e is keyed by prompt
-	e map[string][]float64
-}
-
-func (c *noopLLMClient) Embed(ctx context.Context, modelName, prompt string) ([]float64, error) {
-	e, ok := c.e[prompt]
-	if !ok {
-		return nil, fmt.Errorf("no embedding found")
-	}
-	return e, nil
-}
-
-func (c *noopLLMClient) PullModel(ctx context.Context, modelName string) error {
-	return nil
-}
-
 // s3Client is an interface for an S3 client.
 type s3Client interface {
 	Download(w io.WriterAt, key string) error
-}
-
-// noopS3Client is a no-op S3 client.
-type noopS3Client struct{}
-
-// Download is a no-op implementation of Download
-func (n *noopS3Client) Download(w io.WriterAt, key string) error {
-	return nil
 }
 
 type vstoreClient interface {
 	InsertDocuments(ctx context.Context, collectionName string, vectors [][]float32) error
 }
 
-type noopVStoreClient struct {
-	collectionName string
-}
-
-func (c *noopVStoreClient) InsertDocuments(
-	ctx context.Context, collectionName string, vectors [][]float32) error {
-	if collectionName == c.collectionName {
-		return nil
-	}
-	return fmt.Errorf("collection %s not found", collectionName)
-}
-
-// New creates a new Embedder.
+// E is an embedder.
 type E struct {
 	llmClient    llmClient
 	s3Client     s3Client
 	vstoreClient vstoreClient
 }
 
+// New creates a new Embedder.
 func New(
 	llmClient llmClient,
 	s3Client s3Client,
@@ -87,6 +51,7 @@ func New(
 	}
 }
 
+// AddFile adds a file to the embedder.
 func (e *E) AddFile(ctx context.Context, collectionName, modelName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error {
 	log.Printf("Downloading file from %q\n", filePath)
 	f, err := os.CreateTemp("/tmp", "rag-file-")
@@ -140,7 +105,9 @@ func splitFile(ctx context.Context, fileName, fileType string, chunkSizeTokens, 
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	splitter := textsplitter.NewRecursiveCharacter()
 	splitter.ChunkSize = int(chunkSizeTokens) * charactersPerToken
