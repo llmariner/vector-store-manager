@@ -52,7 +52,15 @@ func New(
 }
 
 // AddFile adds a file to the embedder.
-func (e *E) AddFile(ctx context.Context, collectionName, modelName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error {
+func (e *E) AddFile(
+	ctx context.Context,
+	collectionName,
+	modelName,
+	fileName,
+	filePath string,
+	chunkSizeTokens,
+	chunkOverlapTokens int64,
+) error {
 	log.Printf("Downloading file from %q\n", filePath)
 	f, err := os.CreateTemp("/tmp", "rag-file-")
 	if err != nil {
@@ -72,8 +80,7 @@ func (e *E) AddFile(ctx context.Context, collectionName, modelName, filePath str
 		return err
 	}
 
-	ext := filepath.Ext(filePath)
-	docs, err := splitFile(ctx, f.Name(), ext, chunkSizeTokens, chunkSizeTokens)
+	docs, err := splitFile(ctx, f.Name(), filepath.Ext(fileName), chunkSizeTokens, chunkSizeTokens)
 	if err != nil {
 		return fmt.Errorf("split file: %s", err)
 	}
@@ -126,6 +133,6 @@ func splitFile(ctx context.Context, fileName, fileType string, chunkSizeTokens, 
 		return documentloaders.NewText(file).LoadAndSplit(ctx, splitter)
 	// TODO(guangrui): support more file types.
 	default:
-		return nil, fmt.Errorf("unexpected file type: fileName=%q, fileType=%q", fileName, fileType)
+		return nil, fmt.Errorf("unexpected file type: fileType=%q", fileType)
 	}
 }

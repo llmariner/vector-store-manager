@@ -62,20 +62,6 @@ func (s *S) CreateVectorStoreFile(
 		}
 	}
 
-	if err := s.validateFile(auth.CarryMetadata(ctx), req.FileId); err != nil {
-		return nil, err
-	}
-
-	resp, err := s.fileInternalClient.GetFilePath(ctx, &fv1.GetFilePathRequest{
-		Id: req.FileId,
-	})
-	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			return nil, status.Errorf(codes.NotFound, "file %q not found", req.FileId)
-		}
-		return nil, status.Errorf(codes.Internal, "get file path: %s", err)
-	}
-
 	c, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, req.VectorStoreId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -84,8 +70,21 @@ func (s *S) CreateVectorStoreFile(
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
+	file, err := s.fileGetClient.GetFile(auth.CarryMetadata(ctx), &fv1.GetFileRequest{Id: req.FileId})
+	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			return nil, status.Errorf(codes.InvalidArgument, "file %q not found", req.FileId)
+		}
+		return nil, status.Errorf(codes.Internal, "get file: %s", err)
+	}
+
+	resp, err := s.fileInternalClient.GetFilePath(ctx, &fv1.GetFilePathRequest{Id: req.FileId})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "get file path: %s", err)
+	}
+
 	log.Printf("Added file %q to vector store %q.\n", req.FileId, req.VectorStoreId)
-	if err := s.embedder.AddFile(ctx, c.Name, c.EmbeddingModel, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
+	if err := s.embedder.AddFile(ctx, c.Name, c.EmbeddingModel, file.Filename, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
 		return nil, status.Errorf(codes.Internal, "add file: %s", err)
 	}
 	f := &store.File{
