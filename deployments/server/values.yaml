@@ -11,6 +11,10 @@ global:
       endpointUrl:
       region:
       bucket:
+  awsSecret:
+    name:
+    accessKeyIdKey:
+    secretAccessKeyKey:
   ingress:
     ingressClassName:
     annotations:
