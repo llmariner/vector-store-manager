@@ -78,6 +78,10 @@ func (s *S) CreateVectorStoreFile(
 		return nil, status.Errorf(codes.Internal, "get file: %s", err)
 	}
 
+	if _, err := s.store.GetFileByFileID(req.VectorStoreId, req.FileId); err == nil {
+		return nil, status.Errorf(codes.AlreadyExists, "file %q already exists in vector store %q", req.FileId, req.VectorStoreId)
+	}
+
 	resp, err := s.fileInternalClient.GetFilePath(ctx, &fv1.GetFilePathRequest{Id: req.FileId})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get file path: %s", err)
