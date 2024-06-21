@@ -46,6 +46,20 @@ spec:
             secretKeyRef:
               name: {{ .Values.vectorDatabaseSecret.name }}
               key: {{ .Values.vectorDatabaseSecret.key }}
+        {{- with .Values.global.awsSecret }}
+        {{- if .name }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .name }}
+              key: {{ .accessKeyIdKey }}
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .name }}
+              key: {{ .secretAccessKeyKey }}
+        {{- end }}
+        {{- end }}
       volumes:
       - name: config
         configMap:
