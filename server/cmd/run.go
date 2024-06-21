@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/llm-operator/common/pkg/db"
@@ -100,13 +99,7 @@ func run(ctx context.Context, c *config.Config) error {
 		return err
 	}
 
-	if err := os.Setenv("OLLAMA_HOST", c.OllamaServerAddr); err != nil {
-		return err
-	}
-	o, err := ollama.New()
-	if err != nil {
-		return err
-	}
+	o := ollama.New(c.OllamaServerAddr)
 
 	s3Client := s3.NewClient(c.ObjectStore.S3)
 	e := embedder.New(o, s3Client, vstoreClient)
