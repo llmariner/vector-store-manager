@@ -56,9 +56,9 @@ type Config struct {
 	GRPCPort int `yaml:"grpcPort"`
 	HTTPPort int `yaml:"httpPort"`
 
-	OllamaServerAddr                   string `yaml:"ollamaServerAddr"`
-	FileManagerServerAddr              string `yaml:"fileManagerServerAddr"`
-	FileManagerServerWorkerServiceAddr string `yaml:"fileManagerServerWorkerServiceAddr"`
+	OllamaServerAddr              string `yaml:"ollamaServerAddr"`
+	FileManagerServerAddr         string `yaml:"fileManagerServerAddr"`
+	FileManagerServerInternalAddr string `yaml:"fileManagerServerInternalAddr"`
 
 	VectorDatabase db.Config         `yaml:"vectorDatabase"`
 	Database       db.Config         `yaml:"database"`
@@ -84,8 +84,8 @@ func (c *Config) Validate() error {
 	if c.FileManagerServerAddr == "" {
 		return fmt.Errorf("file manager address must be set")
 	}
-	if c.FileManagerServerWorkerServiceAddr == "" {
-		return fmt.Errorf("file manager server worker service address must be set")
+	if c.FileManagerServerInternalAddr == "" {
+		return fmt.Errorf("file manager server internal address must be set")
 	}
 	if c.Model == "" {
 		return fmt.Errorf("model must be set")

@@ -72,7 +72,7 @@ func TestCreateVectorStoreFile(t *testing.T) {
 						fileID: true,
 					},
 				},
-				&noopFileWorkerClient{
+				&noopFileInternalClient{
 					ids: map[string]string{
 						fileID: "test.txt",
 					},
@@ -188,7 +188,7 @@ func TestListVectorStoreFiles(t *testing.T) {
 						fs[2]: true,
 					},
 				},
-				&noopFileWorkerClient{
+				&noopFileInternalClient{
 					ids: map[string]string{
 						fs[0]: "test0.txt",
 						fs[1]: "test1.txt",
@@ -293,7 +293,7 @@ func TestGetVectorStoreFile(t *testing.T) {
 						fileID: true,
 					},
 				},
-				&noopFileWorkerClient{
+				&noopFileInternalClient{
 					ids: map[string]string{
 						fileID: "test.txt",
 					},
@@ -381,7 +381,7 @@ func TestDeleteVectorStoreFile(t *testing.T) {
 						fileID: true,
 					},
 				},
-				&noopFileWorkerClient{
+				&noopFileInternalClient{
 					ids: map[string]string{
 						fileID: "test.txt",
 					},

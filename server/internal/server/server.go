@@ -30,7 +30,7 @@ type fileGetClient interface {
 	GetFile(ctx context.Context, in *fv1.GetFileRequest, opts ...grpc.CallOption) (*fv1.File, error)
 }
 
-type fileWorkerClient interface {
+type fileInternalClient interface {
 	GetFilePath(ctx context.Context, in *fv1.GetFilePathRequest, opts ...grpc.CallOption) (*fv1.GetFilePathResponse, error)
 }
 
@@ -48,20 +48,20 @@ type embedder interface {
 func New(
 	store *store.S,
 	fileGetClient fileGetClient,
-	fileWorkerClient fileWorkerClient,
+	fileInternalClient fileInternalClient,
 	vstoreClient vstoreClient,
 	e embedder,
 	model string,
 	dimensions int,
 ) *S {
 	return &S{
-		store:            store,
-		fileGetClient:    fileGetClient,
-		fileWorkerClient: fileWorkerClient,
-		vstoreClient:     vstoreClient,
-		embedder:         e,
-		model:            model,
-		dimensions:       dimensions,
+		store:              store,
+		fileGetClient:      fileGetClient,
+		fileInternalClient: fileInternalClient,
+		vstoreClient:       vstoreClient,
+		embedder:           e,
+		model:              model,
+		dimensions:         dimensions,
 	}
 }
 
@@ -73,11 +73,11 @@ type S struct {
 	dimensions int
 	embedder   embedder
 
-	fileWorkerClient fileWorkerClient
-	fileGetClient    fileGetClient
-	vstoreClient     vstoreClient
-	store            *store.S
-	srv              *grpc.Server
+	fileInternalClient fileInternalClient
+	fileGetClient      fileGetClient
+	vstoreClient       vstoreClient
+	store              *store.S
+	srv                *grpc.Server
 
 	enableAuth bool
 }

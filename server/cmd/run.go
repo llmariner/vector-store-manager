@@ -79,11 +79,11 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 	fclient := fv1.NewFilesServiceClient(conn)
 
-	conn, err = grpc.NewClient(c.FileManagerServerWorkerServiceAddr, options)
+	conn, err = grpc.NewClient(c.FileManagerServerInternalAddr, options)
 	if err != nil {
 		return err
 	}
-	fwClient := fv1.NewFilesWorkerServiceClient(conn)
+	fwClient := fv1.NewFilesInternalServiceClient(conn)
 
 	dbInst, err := db.OpenDB(c.Database)
 	if err != nil {

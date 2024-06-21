@@ -9,7 +9,7 @@ data:
     httpPort: {{ .Values.httpPort }}
     grpcPort: {{ .Values.grpcPort }}
     fileManagerServerAddr: {{ .Values.fileManagerServerAddr }}
-    fileManagerServerWorkerServiceAddr: {{ .Values.fileManagerServerWorkerServiceAddr }}
+    fileManagerServerInternalAddr: {{ .Values.fileManagerServerInternalAddr }}
     ollamaServerAddr: {{ .Values.ollamaServerAddr }}
     model: {{ .Values.model }}
     database:
