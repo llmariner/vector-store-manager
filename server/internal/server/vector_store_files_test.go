@@ -83,7 +83,7 @@ func TestCreateVectorStoreFile(t *testing.T) {
 					},
 				},
 				&noopEmbedder{
-					collectionName: collectionName,
+					collectionName: vectorStoreID,
 				},
 				modelName,
 				dimensions,
@@ -133,7 +133,7 @@ func TestCreateVectorStoreFile_AlreadyExists(t *testing.T) {
 			},
 		},
 		&noopEmbedder{
-			collectionName: collectionName,
+			collectionName: vectorStoreID,
 		},
 		modelName,
 		dimensions,
@@ -248,7 +248,7 @@ func TestListVectorStoreFiles(t *testing.T) {
 					},
 				},
 				&noopEmbedder{
-					collectionName: collectionName,
+					collectionName: vectorStoreID,
 				},
 				modelName,
 				dimensions,
@@ -351,7 +351,7 @@ func TestGetVectorStoreFile(t *testing.T) {
 					},
 				},
 				&noopEmbedder{
-					collectionName: collectionName,
+					collectionName: vectorStoreID,
 				},
 				modelName,
 				dimensions,
@@ -439,7 +439,7 @@ func TestDeleteVectorStoreFile(t *testing.T) {
 					},
 				},
 				&noopEmbedder{
-					collectionName: collectionName,
+					collectionName: vectorStoreID,
 				},
 				modelName,
 				dimensions,

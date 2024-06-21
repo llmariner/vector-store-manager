@@ -88,7 +88,7 @@ func (s *S) CreateVectorStoreFile(
 	}
 
 	log.Printf("Added file %q to vector store %q.\n", req.FileId, req.VectorStoreId)
-	if err := s.embedder.AddFile(ctx, c.Name, c.EmbeddingModel, file.Filename, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
+	if err := s.embedder.AddFile(ctx, c.VectorStoreID, c.EmbeddingModel, file.Filename, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
 		return nil, status.Errorf(codes.Internal, "add file: %s", err)
 	}
 	f := &store.File{
