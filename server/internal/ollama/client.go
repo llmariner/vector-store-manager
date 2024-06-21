@@ -42,5 +42,9 @@ func (o *Ollama) PullModel(ctx context.Context, modelName string) error {
 	req := api.PullRequest{
 		Model: modelName,
 	}
-	return o.client.Pull(ctx, &req, nil)
+	// Noop progress function.
+	fn := func(api.ProgressResponse) error {
+		return nil
+	}
+	return o.client.Pull(ctx, &req, fn)
 }
