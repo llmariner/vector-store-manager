@@ -27,7 +27,7 @@ grpcPort: 8081
 
 # The following default values work if the services run in the same namespace.
 fileManagerServerAddr: file-manager-server-grpc:8081
-fileManagerServerWorkerServiceAddr: file-manager-server-worker-service-grpc:8082
+fileManagerServerInternalAddr: file-manager-server-internal-grpc:8083
 ollamaServerAddr: inference-manager-engine-ollama:8080
 
 model: all-minilm

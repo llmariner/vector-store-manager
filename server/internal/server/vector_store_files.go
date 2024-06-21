@@ -62,10 +62,11 @@ func (s *S) CreateVectorStoreFile(
 		}
 	}
 
-	// Pass the Authorization to the context for downstream gRPC calls.
-	ctx = auth.CarryMetadata(ctx)
+	if err := s.validateFile(auth.CarryMetadata(ctx), req.FileId); err != nil {
+		return nil, err
+	}
 
-	resp, err := s.fileWorkerClient.GetFilePath(ctx, &fv1.GetFilePathRequest{
+	resp, err := s.fileInternalClient.GetFilePath(ctx, &fv1.GetFilePathRequest{
 		Id: req.FileId,
 	})
 	if err != nil {

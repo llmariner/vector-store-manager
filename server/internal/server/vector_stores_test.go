@@ -64,7 +64,7 @@ func TestCreateVectorStore(t *testing.T) {
 						fileID: true,
 					},
 				},
-				&noopFileWorkerClient{
+				&noopFileInternalClient{
 					ids: map[string]string{
 						fileID: "test.txt",
 					},
@@ -106,7 +106,7 @@ func TestListVectorStores(t *testing.T) {
 				fileID: true,
 			},
 		},
-		&noopFileWorkerClient{
+		&noopFileInternalClient{
 			ids: map[string]string{
 				fileID: "test.txt",
 			},
@@ -202,7 +202,7 @@ func TestGetVectorStores(t *testing.T) {
 	srv := New(
 		st,
 		&noopFileGetClient{},
-		&noopFileWorkerClient{},
+		&noopFileInternalClient{},
 		&noopVStoreClient{
 			vs: map[string]int64{},
 		},
@@ -315,7 +315,7 @@ func TestDeleteVectorStore(t *testing.T) {
 						fileID: true,
 					},
 				},
-				&noopFileWorkerClient{
+				&noopFileInternalClient{
 					ids: map[string]string{
 						fileID: "test.txt",
 					},
@@ -404,7 +404,7 @@ func TestUpdateVectorStore(t *testing.T) {
 						fileID: true,
 					},
 				},
-				&noopFileWorkerClient{
+				&noopFileInternalClient{
 					ids: map[string]string{
 						fileID: "test.txt",
 					},
@@ -443,11 +443,11 @@ func (c *noopFileGetClient) GetFile(ctx context.Context, in *fv1.GetFileRequest,
 	return &fv1.File{}, nil
 }
 
-type noopFileWorkerClient struct {
+type noopFileInternalClient struct {
 	ids map[string]string
 }
 
-func (c *noopFileWorkerClient) GetFilePath(ctx context.Context, in *fv1.GetFilePathRequest, opts ...grpc.CallOption) (*fv1.GetFilePathResponse, error) {
+func (c *noopFileInternalClient) GetFilePath(ctx context.Context, in *fv1.GetFilePathRequest, opts ...grpc.CallOption) (*fv1.GetFilePathResponse, error) {
 	path, ok := c.ids[in.Id]
 	if !ok {
 		return nil, status.Error(codes.NotFound, "file not found")

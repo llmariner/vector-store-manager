@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.51.19
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/llm-operator/common v0.3.0
-	github.com/llm-operator/file-manager v0.47.0
+	github.com/llm-operator/file-manager v0.51.0
 	github.com/llm-operator/rbac-manager v0.73.0
 	github.com/milvus-io/milvus-sdk-go/v2 v2.4.0
 	github.com/ollama/ollama v0.1.44
