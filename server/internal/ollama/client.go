@@ -2,19 +2,21 @@ package ollama
 
 import (
 	"context"
+	"net/http"
+	"net/url"
 
 	"github.com/ollama/ollama/api"
 )
 
 // New returns a new Ollama.
-func New() (*Ollama, error) {
-	client, err := api.ClientFromEnvironment()
-	if err != nil {
-		return nil, err
+func New(addr string) *Ollama {
+	url := &url.URL{
+		Scheme: "http",
+		Host:   addr,
 	}
 	return &Ollama{
-		client: client,
-	}, nil
+		client: api.NewClient(url, http.DefaultClient),
+	}
 }
 
 // Ollama wraps the Ollama client.
