@@ -12,6 +12,7 @@ import (
 
 func TestAddFile(t *testing.T) {
 	const (
+		fileName           = "test.txt"
 		filePath           = "testdata/test.txt"
 		collectionName0    = "collection0"
 		vectorStoreName    = "vector_store_1"
@@ -22,14 +23,16 @@ func TestAddFile(t *testing.T) {
 	)
 
 	tcs := []struct {
-		name    string
-		path    string
-		wantErr bool
+		name     string
+		fileName string
+		path     string
+		wantErr  bool
 	}{
 		{
-			name:    "success",
-			path:    filePath,
-			wantErr: false,
+			name:     "success",
+			fileName: fileName,
+			path:     filePath,
+			wantErr:  false,
 		},
 	}
 
@@ -48,7 +51,7 @@ func TestAddFile(t *testing.T) {
 				},
 			)
 			ctx := context.Background()
-			err := e.AddFile(ctx, collectionName0, modelName, tc.path, chunkSizeTokens, chunkOverlapTokens)
+			err := e.AddFile(ctx, collectionName0, modelName, tc.fileName, tc.path, chunkSizeTokens, chunkOverlapTokens)
 			if tc.wantErr {
 				assert.Error(t, err)
 				return

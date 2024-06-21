@@ -41,7 +41,7 @@ type vstoreClient interface {
 }
 
 type embedder interface {
-	AddFile(ctx context.Context, collectionName, modelName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error
+	AddFile(ctx context.Context, collectionName, modelName, fileName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error
 }
 
 // New creates a server.

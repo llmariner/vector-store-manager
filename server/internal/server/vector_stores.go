@@ -45,6 +45,7 @@ func (s *S) CreateVectorStore(
 	// Pass the Authorization to the context for downstream gRPC calls.
 	ctx = auth.CarryMetadata(ctx)
 
+	// TODO(kenji): Add these files to the vector store?
 	for _, fid := range req.FileIds {
 		if err := s.validateFile(ctx, fid); err != nil {
 			return nil, err
