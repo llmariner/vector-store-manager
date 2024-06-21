@@ -126,6 +126,6 @@ func splitFile(ctx context.Context, fileName, fileType string, chunkSizeTokens, 
 		return documentloaders.NewText(file).LoadAndSplit(ctx, splitter)
 	// TODO(guangrui): support more file types.
 	default:
-		return nil, fmt.Errorf("unexpected file type: %s", fileType)
+		return nil, fmt.Errorf("unexpected file type: fileName=%q, fileType=%q", fileName, fileType)
 	}
 }
