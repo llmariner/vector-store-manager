@@ -7,7 +7,8 @@ import (
 	v1 "github.com/llm-operator/vector-store-manager/api/v1"
 	"github.com/llm-operator/vector-store-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -17,7 +18,6 @@ const (
 )
 
 func TestCreateVectorStoreFile(t *testing.T) {
-
 	tcs := []struct {
 		name    string
 		req     *v1.CreateVectorStoreFileRequest
@@ -88,7 +88,6 @@ func TestCreateVectorStoreFile(t *testing.T) {
 				modelName,
 				dimensions,
 			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,
 				VectorStoreID: vectorStoreID,
@@ -97,7 +96,7 @@ func TestCreateVectorStoreFile(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
-			resp, err := srv.CreateVectorStoreFile(ctx, tc.req)
+			resp, err := srv.CreateVectorStoreFile(context.Background(), tc.req)
 			if tc.wantErr {
 				assert.Error(t, err)
 				return
@@ -110,6 +109,54 @@ func TestCreateVectorStoreFile(t *testing.T) {
 			assert.Equal(t, string(store.ChunkingStrategyTypeAuto), resp.ChunkingStrategy.Type)
 		})
 	}
+}
+
+func TestCreateVectorStoreFile_AlreadyExists(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(
+		st,
+		&noopFileGetClient{
+			ids: map[string]bool{
+				fileID: true,
+			},
+		},
+		&noopFileInternalClient{
+			ids: map[string]string{
+				fileID: "test.txt",
+			},
+		},
+		&noopVStoreClient{
+			vs: map[string]int64{
+				vectorStoreID: 1,
+			},
+		},
+		&noopEmbedder{
+			collectionName: collectionName,
+		},
+		modelName,
+		dimensions,
+	)
+	err := st.CreateCollection(&store.Collection{
+		CollectionID:  collectionID,
+		VectorStoreID: vectorStoreID,
+		Name:          collectionName,
+		Status:        store.CollectionStatusCompleted,
+		ProjectID:     "default",
+	})
+	assert.NoError(t, err)
+
+	req := &v1.CreateVectorStoreFileRequest{
+		FileId:        fileID,
+		VectorStoreId: vectorStoreID,
+	}
+	_, err = srv.CreateVectorStoreFile(context.Background(), req)
+	assert.NoError(t, err)
+
+	_, err = srv.CreateVectorStoreFile(context.Background(), req)
+	assert.Error(t, err)
+	assert.Equal(t, codes.AlreadyExists, status.Code(err))
 }
 
 func TestListVectorStoreFiles(t *testing.T) {
@@ -206,7 +253,6 @@ func TestListVectorStoreFiles(t *testing.T) {
 				modelName,
 				dimensions,
 			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,
 				VectorStoreID: vectorStoreID,
@@ -215,6 +261,7 @@ func TestListVectorStoreFiles(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
+			ctx := context.Background()
 			for _, f := range fs {
 				resp, err := srv.CreateVectorStoreFile(ctx, &v1.CreateVectorStoreFileRequest{
 					FileId:        f,
@@ -309,7 +356,6 @@ func TestGetVectorStoreFile(t *testing.T) {
 				modelName,
 				dimensions,
 			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,
 				VectorStoreID: vectorStoreID,
@@ -318,6 +364,7 @@ func TestGetVectorStoreFile(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
+			ctx := context.Background()
 			resp, err := srv.CreateVectorStoreFile(ctx, &v1.CreateVectorStoreFileRequest{
 				FileId:        fileID,
 				VectorStoreId: vectorStoreID,
@@ -397,7 +444,6 @@ func TestDeleteVectorStoreFile(t *testing.T) {
 				modelName,
 				dimensions,
 			)
-			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("Authorization", "dummy"))
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,
 				VectorStoreID: vectorStoreID,
@@ -406,6 +452,7 @@ func TestDeleteVectorStoreFile(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
+			ctx := context.Background()
 			resp, err := srv.CreateVectorStoreFile(ctx, &v1.CreateVectorStoreFileRequest{
 				FileId:        fileID,
 				VectorStoreId: vectorStoreID,
