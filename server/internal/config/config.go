@@ -53,8 +53,9 @@ func (c *AuthConfig) Validate() error {
 
 // Config is the configuration.
 type Config struct {
-	GRPCPort int `yaml:"grpcPort"`
-	HTTPPort int `yaml:"httpPort"`
+	GRPCPort         int `yaml:"grpcPort"`
+	HTTPPort         int `yaml:"httpPort"`
+	InternalGRPCPort int `yaml:"internalGrpcPort"`
 
 	OllamaServerAddr              string `yaml:"ollamaServerAddr"`
 	FileManagerServerAddr         string `yaml:"fileManagerServerAddr"`
@@ -77,6 +78,9 @@ func (c *Config) Validate() error {
 	}
 	if c.HTTPPort <= 0 {
 		return fmt.Errorf("httpPort must be greater than 0")
+	}
+	if c.InternalGRPCPort <= 0 {
+		return fmt.Errorf("internalGrpcPort must be greater than 0")
 	}
 	if c.OllamaServerAddr == "" {
 		return fmt.Errorf("ollama server addr must be set")

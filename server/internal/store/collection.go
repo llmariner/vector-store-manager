@@ -45,12 +45,14 @@ type Collection struct {
 	// UsageBytes is the total number of bytes used by the files in the vector store.
 	UsageBytes int64
 
+	// TODO(guangrui): Update counters.
 	FileCountsInProgress int64
 	FileCountsCompleted  int64
 	FileCountsFailed     int64
 	FileCountsCancelled  int64
 	FileCountsTotal      int64
 
+	// TODO(guangrui): Update status.
 	Status CollectionStatus
 
 	Anchor ExpiresAfterAnchor

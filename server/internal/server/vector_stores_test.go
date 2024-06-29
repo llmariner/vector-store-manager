@@ -491,7 +491,14 @@ type noopEmbedder struct {
 	collectionName string
 }
 
-func (c *noopEmbedder) AddFile(ctx context.Context, collectionName, modelName, fileName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error {
+func (c *noopEmbedder) AddFile(ctx context.Context, collectionName, modelName, fileID, fileName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error {
+	if collectionName == c.collectionName {
+		return nil
+	}
+	return fmt.Errorf("collection %s not found", collectionName)
+}
+
+func (c *noopEmbedder) DeleteFile(ctx context.Context, collectionName, fileID string) error {
 	if collectionName == c.collectionName {
 		return nil
 	}

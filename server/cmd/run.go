@@ -120,6 +120,11 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig)
 	}()
 
+	go func() {
+		s := server.NewInternal(c.Model, e)
+		errCh <- s.Run(c.InternalGRPCPort)
+	}()
+
 	return <-errCh
 }
 

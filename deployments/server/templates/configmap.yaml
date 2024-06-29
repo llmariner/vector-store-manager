@@ -8,6 +8,7 @@ data:
   config.yaml: |
     httpPort: {{ .Values.httpPort }}
     grpcPort: {{ .Values.grpcPort }}
+    internalGrpcPort: {{ .Values.internalGrpcPort }}
     fileManagerServerAddr: {{ .Values.fileManagerServerAddr }}
     fileManagerServerInternalAddr: {{ .Values.fileManagerServerInternalAddr }}
     ollamaServerAddr: {{ .Values.ollamaServerAddr }}

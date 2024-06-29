@@ -25,7 +25,7 @@ type Ollama struct {
 }
 
 // Embed creates embeddings.
-func (o *Ollama) Embed(ctx context.Context, modelName, prompt string) ([]float64, error) {
+func (o *Ollama) Embed(ctx context.Context, modelName, prompt string) ([]float32, error) {
 	req := api.EmbeddingRequest{
 		Model:  modelName,
 		Prompt: prompt,
@@ -34,7 +34,13 @@ func (o *Ollama) Embed(ctx context.Context, modelName, prompt string) ([]float64
 	if err != nil {
 		return nil, err
 	}
-	return resp.Embedding, nil
+
+	// ollama generates embeddings as []float64, but milvus takes []float32 only, so convert []float64 to []float32.
+	var es32 []float32
+	for _, e := range resp.Embedding {
+		es32 = append(es32, float32(e))
+	}
+	return es32, nil
 }
 
 // PullModel pulls a model.
