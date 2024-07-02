@@ -50,6 +50,7 @@ type File struct {
 	// UsageBytes is the total vector store usage in bytes. Note that this may be different from the original file size.
 	UsageBytes int64
 
+	// TODO(guangrui): handle status update.
 	Status FileStatus
 
 	LastErrorCode    LastErrorCode

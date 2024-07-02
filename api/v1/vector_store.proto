@@ -157,6 +157,16 @@ message DeleteVectorStoreFileResponse {
     bool deleted = 3;
 }
 
+message SearchVectorStoreRequest {
+  string vector_store_id = 1;
+  string query = 2;
+  int32 num_documents = 3;
+}
+
+message SearchVectorStoreResponse {
+  repeated string documents = 1;
+}
+
 service VectorStoreService {
   rpc CreateVectorStore(CreateVectorStoreRequest) returns (VectorStore) {
     option (google.api.http) = {
@@ -213,5 +223,10 @@ service VectorStoreService {
     option (google.api.http) = {
       delete: "/v1/vector_stores/{vector_store_id}/files/{file_id}"
     };
+  }
+}
+
+service VectorStoreInternalService {
+  rpc SearchVectorStore(SearchVectorStoreRequest) returns (SearchVectorStoreResponse) {
   }
 }

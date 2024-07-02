@@ -50,7 +50,7 @@ func TestMilvusCreateListUpdateDeleteVectorStores(t *testing.T) {
 	assert.Equal(t, len(preExist), len(vss))
 }
 
-func TestInsertDocuments(t *testing.T) {
+func TestInsertSearchDeleteDocuments(t *testing.T) {
 	const (
 		collectionName = "test_collection_1"
 		dimensions     = 4
@@ -59,7 +59,10 @@ func TestInsertDocuments(t *testing.T) {
 	vectors := [][]float32{
 		{-0.2161688655614853, 0.4428754150867462, 0.12087928503751755, 0.38950398564338684},
 		{-0.023337043821811676, 0.19466467201709747, -0.5630808472633362, 0.5578770637512207},
+		{-0.2161688655614855, 0.4428754150867464, 0.12087928503751755, 0.38950398564338684},
 	}
+	fileIDs := []string{"file-001", "file-001", "file-002"}
+	texts := []string{"hello", "world", "bye"}
 
 	cfg := db.Config{
 		Host: "localhost",
@@ -72,7 +75,23 @@ func TestInsertDocuments(t *testing.T) {
 	_, err = s.CreateVectorStore(ctx, collectionName, dimensions)
 	assert.NoError(t, err)
 
-	err = s.InsertDocuments(ctx, collectionName, vectors)
+	err = s.InsertDocuments(ctx, collectionName, fileIDs, texts, vectors)
+	assert.NoError(t, err)
+
+	got, err := s.Search(ctx, collectionName, []float32{-0.023337043821811676, 0.19466467201709747, -0.5630808472633364, 0.5578770637512209}, 1)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(got))
+	assert.Equal(t, []string{"world"}, got)
+
+	err = s.DeleteDocuments(ctx, collectionName, "file-001")
+	assert.NoError(t, err)
+
+	got, err = s.Search(ctx, collectionName, []float32{-0.023337043821811676, 0.19466467201709747, -0.5630808472633364, 0.5578770637512209}, 10)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(got))
+	assert.Equal(t, []string{"bye"}, got)
+
+	err = s.DeleteDocuments(ctx, collectionName, "file-unknown")
 	assert.NoError(t, err)
 
 	err = s.DeleteVectorStore(ctx, collectionName)

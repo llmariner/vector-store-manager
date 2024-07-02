@@ -88,7 +88,7 @@ func (s *S) CreateVectorStoreFile(
 	}
 
 	log.Printf("Added file %q to vector store %q.\n", req.FileId, req.VectorStoreId)
-	if err := s.embedder.AddFile(ctx, c.VectorStoreID, c.EmbeddingModel, file.Filename, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
+	if err := s.embedder.AddFile(ctx, c.VectorStoreID, c.EmbeddingModel, req.FileId, file.Filename, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
 		return nil, status.Errorf(codes.Internal, "add file: %s", err)
 	}
 	f := &store.File{
@@ -252,6 +252,12 @@ func (s *S) DeleteVectorStoreFile(
 
 	if err := s.validateVectorStore(req.VectorStoreId, userInfo.ProjectID); err != nil {
 		return nil, err
+	}
+
+	// TODO(guangrui): Gracefully handle the deletion error.
+	if err := s.embedder.DeleteFile(ctx, req.VectorStoreId, req.FileId); err != nil {
+		// milvus does not return error if the file does not exist.
+		return nil, status.Errorf(codes.Internal, "embedder delete file: %s", err)
 	}
 
 	if err := s.store.DeleteFile(req.VectorStoreId, req.FileId); err != nil {

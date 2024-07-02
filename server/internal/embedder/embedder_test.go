@@ -10,8 +10,9 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func TestAddFile(t *testing.T) {
+func TestAddSearchDeleteFile(t *testing.T) {
 	const (
+		fileID             = "file-001"
 		fileName           = "test.txt"
 		filePath           = "testdata/test.txt"
 		collectionName0    = "collection0"
@@ -40,22 +41,34 @@ func TestAddFile(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			e := New(
 				&noopLLMClient{
-					e: map[string][]float64{
-						"line1": {0.111, 0.122},
-						"line2": {0.211, 0.222},
+					e: map[string][]float32{
+						"line1": {1.111, 0.122},
+						"line2": {2.211, 0.222},
 					},
 				},
 				&noopS3Client{},
 				&noopVStoreClient{
 					collectionName: collectionName0,
+					docs: map[int][]string{
+						1: {"line1"},
+						2: {"line2"},
+					},
 				},
 			)
 			ctx := context.Background()
-			err := e.AddFile(ctx, collectionName0, modelName, tc.fileName, tc.path, chunkSizeTokens, chunkOverlapTokens)
+			err := e.AddFile(ctx, collectionName0, modelName, fileID, tc.fileName, tc.path, chunkSizeTokens, chunkOverlapTokens)
 			if tc.wantErr {
 				assert.Error(t, err)
 				return
 			}
+			assert.NoError(t, err)
+
+			docs, err := e.Search(ctx, collectionName0, modelName, "line1", 1)
+			assert.NoError(t, err)
+			assert.Equal(t, 1, len(docs))
+			assert.Equal(t, "line1", docs[0])
+
+			err = e.DeleteFile(ctx, collectionName0, fileID)
 			assert.NoError(t, err)
 		})
 	}
@@ -106,10 +119,10 @@ func TestSplitFile(t *testing.T) {
 
 type noopLLMClient struct {
 	// e is keyed by prompt
-	e map[string][]float64
+	e map[string][]float32
 }
 
-func (c *noopLLMClient) Embed(ctx context.Context, modelName, prompt string) ([]float64, error) {
+func (c *noopLLMClient) Embed(ctx context.Context, modelName, prompt string) ([]float32, error) {
 	e, ok := c.e[prompt]
 	if !ok {
 		return nil, fmt.Errorf("no embedding found")
@@ -131,15 +144,31 @@ func (n *noopS3Client) Download(w io.WriterAt, key string) error {
 
 type noopVStoreClient struct {
 	collectionName string
+	docs           map[int][]string
 }
 
 func (c *noopVStoreClient) InsertDocuments(
 	ctx context.Context,
 	collectionName string,
+	fileIDs, texts []string,
 	vectors [][]float32,
 ) error {
 	if collectionName != c.collectionName {
 		return fmt.Errorf("collection %s not found", collectionName)
 	}
 	return nil
+}
+
+func (c *noopVStoreClient) DeleteDocuments(ctx context.Context, collectionName, fileID string) error {
+	if collectionName != c.collectionName {
+		return fmt.Errorf("collection %s not found", collectionName)
+	}
+	return nil
+}
+
+func (c *noopVStoreClient) Search(ctx context.Context, collectionName string, vectors []float32, numDocuments int) ([]string, error) {
+	if collectionName != c.collectionName {
+		return nil, fmt.Errorf("collection %s not found", collectionName)
+	}
+	return c.docs[int(vectors[0])], nil
 }

@@ -31,6 +31,9 @@ spec:
         - name: grpc
           containerPort: {{ .Values.grpcPort }}
           protocol: TCP
+        - name: internal-grpc
+          containerPort: {{ .Values.internalGrpcPort }}
+          protocol: TCP
         volumeMounts:
         - name: config
           mountPath: /etc/config

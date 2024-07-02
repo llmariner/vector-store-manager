@@ -18,7 +18,7 @@ const (
 )
 
 type llmClient interface {
-	Embed(ctx context.Context, modelName, prompt string) ([]float64, error)
+	Embed(ctx context.Context, modelName, prompt string) ([]float32, error)
 	PullModel(ctx context.Context, modelName string) error
 }
 
@@ -28,7 +28,9 @@ type s3Client interface {
 }
 
 type vstoreClient interface {
-	InsertDocuments(ctx context.Context, collectionName string, vectors [][]float32) error
+	InsertDocuments(ctx context.Context, collectionName string, files, texts []string, vectors [][]float32) error
+	DeleteDocuments(ctx context.Context, collectionName, fileID string) error
+	Search(ctx context.Context, collectionName string, vectors []float32, numDocuments int) ([]string, error)
 }
 
 // E is an embedder.
@@ -56,6 +58,7 @@ func (e *E) AddFile(
 	ctx context.Context,
 	collectionName,
 	modelName,
+	fileID,
 	fileName,
 	filePath string,
 	chunkSizeTokens,
@@ -84,26 +87,25 @@ func (e *E) AddFile(
 	if err != nil {
 		return fmt.Errorf("split file: %s", err)
 	}
+	log.Printf("Splitted file into %d chunks\n", len(docs))
 
 	if err := e.llmClient.PullModel(ctx, modelName); err != nil {
 		return fmt.Errorf("pull model: %s", err)
 	}
 
-	embeddings := make([][]float32, 0, len(docs))
+	var embeddings [][]float32
+	var texts []string
+	var files []string
 	for _, doc := range docs {
 		es, err := e.llmClient.Embed(ctx, modelName, doc.PageContent)
 		if err != nil {
-			return err
+			return fmt.Errorf("llm embed: %s", err)
 		}
-
-		// ollama generates embeddings as []float64, and milvus takes []float32 only, so convert []float64 to []float32.
-		var es32 []float32
-		for _, e := range es {
-			es32 = append(es32, float32(e))
-		}
-		embeddings = append(embeddings, es32)
+		embeddings = append(embeddings, es)
+		texts = append(texts, doc.PageContent)
+		files = append(files, fileID)
 	}
-	return e.vstoreClient.InsertDocuments(ctx, collectionName, embeddings)
+	return e.vstoreClient.InsertDocuments(ctx, collectionName, files, texts, embeddings)
 }
 
 func splitFile(ctx context.Context, fileName, fileType string, chunkSizeTokens, chunkOverlapTokens int64) ([]schema.Document, error) {
@@ -135,4 +137,28 @@ func splitFile(ctx context.Context, fileName, fileType string, chunkSizeTokens, 
 	default:
 		return nil, fmt.Errorf("unexpected file type: fileType=%q", fileType)
 	}
+}
+
+// DeleteFile deletes a file from the embedder.
+func (e *E) DeleteFile(ctx context.Context, collectionName, fileID string) error {
+	return e.vstoreClient.DeleteDocuments(ctx, collectionName, fileID)
+}
+
+// Search searches for the matched documents in the embedder for the given query.
+func (e *E) Search(ctx context.Context, collectionName, modelName, query string, numDocs int) ([]string, error) {
+	if err := e.llmClient.PullModel(ctx, modelName); err != nil {
+		return nil, fmt.Errorf("pull model: %s", err)
+	}
+
+	es, err := e.llmClient.Embed(ctx, modelName, query)
+	if err != nil {
+		return nil, fmt.Errorf("embed: %s", err)
+	}
+
+	results, err := e.vstoreClient.Search(ctx, collectionName, es, numDocs)
+	if err != nil {
+		return nil, fmt.Errorf("vector search: %s", err)
+	}
+	log.Printf("search result(%s): %+v\n", query, results)
+	return results, nil
 }

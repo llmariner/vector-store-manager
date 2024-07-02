@@ -7,6 +7,9 @@
   "tags": [
     {
       "name": "VectorStoreService"
+    },
+    {
+      "name": "VectorStoreInternalService"
     }
   ],
   "consumes": [
@@ -581,6 +584,17 @@
         },
         "hasMore": {
           "type": "boolean"
+        }
+      }
+    },
+    "v1SearchVectorStoreResponse": {
+      "type": "object",
+      "properties": {
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

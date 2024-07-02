@@ -28,6 +28,7 @@ global:
 
 httpPort: 8080
 grpcPort: 8081
+internalGrpcPort: 8083
 
 # The following default values work if the services run in the same namespace.
 fileManagerServerAddr: file-manager-server-grpc:8081
