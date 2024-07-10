@@ -21,6 +21,7 @@ type VectorStoreServiceClient interface {
 	CreateVectorStore(ctx context.Context, in *CreateVectorStoreRequest, opts ...grpc.CallOption) (*VectorStore, error)
 	ListVectorStores(ctx context.Context, in *ListVectorStoresRequest, opts ...grpc.CallOption) (*ListVectorStoresResponse, error)
 	GetVectorStore(ctx context.Context, in *GetVectorStoreRequest, opts ...grpc.CallOption) (*VectorStore, error)
+	GetVectorStoreByName(ctx context.Context, in *GetVectorStoreByNameRequest, opts ...grpc.CallOption) (*VectorStore, error)
 	UpdateVectorStore(ctx context.Context, in *UpdateVectorStoreRequest, opts ...grpc.CallOption) (*VectorStore, error)
 	DeleteVectorStore(ctx context.Context, in *DeleteVectorStoreRequest, opts ...grpc.CallOption) (*DeleteVectorStoreResponse, error)
 	CreateVectorStoreFile(ctx context.Context, in *CreateVectorStoreFileRequest, opts ...grpc.CallOption) (*VectorStoreFile, error)
@@ -58,6 +59,15 @@ func (c *vectorStoreServiceClient) ListVectorStores(ctx context.Context, in *Lis
 func (c *vectorStoreServiceClient) GetVectorStore(ctx context.Context, in *GetVectorStoreRequest, opts ...grpc.CallOption) (*VectorStore, error) {
 	out := new(VectorStore)
 	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vectorStoreServiceClient) GetVectorStoreByName(ctx context.Context, in *GetVectorStoreByNameRequest, opts ...grpc.CallOption) (*VectorStore, error) {
+	out := new(VectorStore)
+	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,6 +135,7 @@ type VectorStoreServiceServer interface {
 	CreateVectorStore(context.Context, *CreateVectorStoreRequest) (*VectorStore, error)
 	ListVectorStores(context.Context, *ListVectorStoresRequest) (*ListVectorStoresResponse, error)
 	GetVectorStore(context.Context, *GetVectorStoreRequest) (*VectorStore, error)
+	GetVectorStoreByName(context.Context, *GetVectorStoreByNameRequest) (*VectorStore, error)
 	UpdateVectorStore(context.Context, *UpdateVectorStoreRequest) (*VectorStore, error)
 	DeleteVectorStore(context.Context, *DeleteVectorStoreRequest) (*DeleteVectorStoreResponse, error)
 	CreateVectorStoreFile(context.Context, *CreateVectorStoreFileRequest) (*VectorStoreFile, error)
@@ -146,6 +157,9 @@ func (UnimplementedVectorStoreServiceServer) ListVectorStores(context.Context, *
 }
 func (UnimplementedVectorStoreServiceServer) GetVectorStore(context.Context, *GetVectorStoreRequest) (*VectorStore, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVectorStore not implemented")
+}
+func (UnimplementedVectorStoreServiceServer) GetVectorStoreByName(context.Context, *GetVectorStoreByNameRequest) (*VectorStore, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVectorStoreByName not implemented")
 }
 func (UnimplementedVectorStoreServiceServer) UpdateVectorStore(context.Context, *UpdateVectorStoreRequest) (*VectorStore, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateVectorStore not implemented")
@@ -228,6 +242,24 @@ func _VectorStoreService_GetVectorStore_Handler(srv interface{}, ctx context.Con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).GetVectorStore(ctx, req.(*GetVectorStoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VectorStoreService_GetVectorStoreByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVectorStoreByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VectorStoreServiceServer).GetVectorStoreByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VectorStoreServiceServer).GetVectorStoreByName(ctx, req.(*GetVectorStoreByNameRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -358,6 +390,10 @@ var VectorStoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVectorStore",
 			Handler:    _VectorStoreService_GetVectorStore_Handler,
+		},
+		{
+			MethodName: "GetVectorStoreByName",
+			Handler:    _VectorStoreService_GetVectorStoreByName_Handler,
 		},
 		{
 			MethodName: "UpdateVectorStore",
