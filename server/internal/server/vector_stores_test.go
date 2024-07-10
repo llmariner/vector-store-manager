@@ -195,7 +195,7 @@ func TestListVectorStores(t *testing.T) {
 	}
 }
 
-func TestGetVectorStores(t *testing.T) {
+func TestGetVectorStore(t *testing.T) {
 	st, tearDown := store.NewTest(t)
 	defer tearDown()
 
@@ -255,6 +255,77 @@ func TestGetVectorStores(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			got, err := srv.GetVectorStore(ctx, tc.req)
+			if tc.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tc.resp.Id, got.Id)
+			assert.Equal(t, tc.resp.Name, got.Name)
+		})
+	}
+}
+
+func TestGetVectorStoreByName(t *testing.T) {
+	st, tearDown := store.NewTest(t)
+	defer tearDown()
+
+	srv := New(
+		st,
+		&noopFileGetClient{},
+		&noopFileInternalClient{},
+		&noopVStoreClient{
+			vs: map[string]int64{},
+		},
+		&noopEmbedder{},
+		modelName,
+		dimensions,
+	)
+
+	names := []string{
+		"vector_store_1",
+		"vector_store_2",
+	}
+	ctx := context.Background()
+	var vss []*v1.VectorStore
+	for _, name := range names {
+		vs, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
+			Name: name,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, name, vs.Name)
+		vss = append(vss, vs)
+	}
+
+	tcs := []struct {
+		name    string
+		req     *v1.GetVectorStoreByNameRequest
+		resp    *v1.VectorStore
+		wantErr bool
+	}{
+		{
+			name: "success",
+			req: &v1.GetVectorStoreByNameRequest{
+				Name: vss[0].Name,
+			},
+			resp: &v1.VectorStore{
+				Id:   vss[0].Id,
+				Name: vss[0].Name,
+			},
+			wantErr: false,
+		},
+		{
+			name: "not found",
+			req: &v1.GetVectorStoreByNameRequest{
+				Name: "dummy",
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := srv.GetVectorStoreByName(ctx, tc.req)
 			if tc.wantErr {
 				assert.Error(t, err)
 				return

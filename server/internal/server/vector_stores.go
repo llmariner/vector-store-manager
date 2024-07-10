@@ -255,6 +255,36 @@ func (s *S) GetVectorStore(
 	return toVectorStoreProto(c, cm), nil
 }
 
+// GetVectorStoreByName gets a vector store by its name.
+func (s *S) GetVectorStoreByName(
+	ctx context.Context,
+	req *v1.GetVectorStoreByNameRequest,
+) (*v1.VectorStore, error) {
+	userInfo, err := s.extractUserInfoFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
+	}
+
+	c, err := s.store.GetCollectionByName(userInfo.ProjectID, req.Name)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "collection %q not found", req.Name)
+		}
+		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
+	}
+
+	cm, err := s.store.ListCollectionMetadataByVectorStoreID(c.VectorStoreID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list collection metadata: %s", err)
+	}
+
+	return toVectorStoreProto(c, cm), nil
+}
+
 // UpdateVectorStore updates a vector store.
 func (s *S) UpdateVectorStore(
 	ctx context.Context,

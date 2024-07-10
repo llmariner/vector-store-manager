@@ -78,6 +78,10 @@ message GetVectorStoreRequest {
     string id = 1;
 }
 
+message GetVectorStoreByNameRequest {
+    string name = 1;
+}
+
 message UpdateVectorStoreRequest {
     string id = 1;
     // string or null.
@@ -185,6 +189,9 @@ service VectorStoreService {
     option (google.api.http) = {
       get: "/v1/vector_stores/{id}"
     };
+  }
+
+  rpc GetVectorStoreByName(GetVectorStoreByNameRequest) returns (VectorStore) {
   }
 
   rpc UpdateVectorStore(UpdateVectorStoreRequest) returns (VectorStore) {
