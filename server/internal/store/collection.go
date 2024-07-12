@@ -45,7 +45,6 @@ type Collection struct {
 	// UsageBytes is the total number of bytes used by the files in the vector store.
 	UsageBytes int64
 
-	// TODO(guangrui): Update counters.
 	FileCountsInProgress int64
 	FileCountsCompleted  int64
 	FileCountsFailed     int64
@@ -159,11 +158,16 @@ func UpdateCollectionInTransaction(tx *gorm.DB, nc *Collection) error {
 		Where("id = ?", nc.ID).
 		Where("version = ?", nc.Version).
 		Updates(map[string]interface{}{
-			"name":               nc.Name,
-			"status":             nc.Status,
-			"expires_after_days": nc.ExpiresAfterDays,
-			"expires_at":         nc.ExpiresAt,
-			"version":            nc.Version + 1,
+			"name":                    nc.Name,
+			"status":                  nc.Status,
+			"expires_after_days":      nc.ExpiresAfterDays,
+			"expires_at":              nc.ExpiresAt,
+			"file_counts_cancelled":   nc.FileCountsCancelled,
+			"file_counts_completed":   nc.FileCountsCompleted,
+			"file_counts_failed":      nc.FileCountsFailed,
+			"file_counts_in_progress": nc.FileCountsInProgress,
+			"file_counts_total":       nc.FileCountsTotal,
+			"version":                 nc.Version + 1,
 		})
 	if err := result.Error; err != nil {
 		return err

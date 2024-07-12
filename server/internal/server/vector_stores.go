@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -45,11 +46,13 @@ func (s *S) CreateVectorStore(
 	// Pass the Authorization to the context for downstream gRPC calls.
 	ctx = auth.CarryMetadata(ctx)
 
-	// TODO(kenji): Add these files to the vector store?
+	var fs []*fv1.File
 	for _, fid := range req.FileIds {
-		if err := s.validateFile(ctx, fid); err != nil {
+		f, err := s.validateFile(ctx, fid)
+		if err != nil {
 			return nil, err
 		}
+		fs = append(fs, f)
 	}
 
 	if _, err := s.store.GetCollectionByName(userInfo.ProjectID, req.Name); err == nil {
@@ -77,7 +80,7 @@ func (s *S) CreateVectorStore(
 		VectorStoreID:       vsID,
 		CollectionID:        cid,
 		Name:                req.Name,
-		Status:              store.CollectionStatusInProgress,
+		Status:              store.CollectionStatusCompleted,
 		OrganizationID:      userInfo.OrganizationID,
 		ProjectID:           userInfo.ProjectID,
 		TenantID:            userInfo.TenantID,
@@ -117,19 +120,48 @@ func (s *S) CreateVectorStore(
 		return nil, status.Errorf(codes.Internal, "transaction: %s", err)
 	}
 
-	return toVectorStoreProto(c, cms), nil
+	cs, err := getChunkingStrategy(req.ChunkingStrategy)
+	if err != nil {
+		return nil, err
+	}
+
+	fileCompleted := int64(0)
+	var errMsgs []string
+	for _, f := range fs {
+		if _, err := s.createVectorStoreFile(ctx, c, f, cs); err != nil {
+			log.Printf("Failed to add file %q to vector store %q: %s", f.Id, c.VectorStoreID, err)
+			errMsgs = append(errMsgs, fmt.Sprintf("file %q: %s", f.Id, err))
+			continue
+		}
+		fileCompleted++
+	}
+
+	c, err = s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, c.VectorStoreID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
+	}
+	c.FileCountsCompleted += fileCompleted
+	c.FileCountsTotal += fileCompleted
+	if err := s.store.UpdateCollection(c); err != nil {
+		return nil, status.Errorf(codes.Internal, "update collection: %s", err)
+	}
+
+	vsProto := toVectorStoreProto(c, cms)
+	if len(errMsgs) > 0 {
+		return vsProto, status.Errorf(codes.Internal, "create vector store file: %s", strings.Join(errMsgs, ";"))
+	}
+	return vsProto, nil
 }
 
-func (s *S) validateFile(ctx context.Context, fileID string) error {
-	if _, err := s.fileGetClient.GetFile(ctx, &fv1.GetFileRequest{
-		Id: fileID,
-	}); err != nil {
+func (s *S) validateFile(ctx context.Context, fileID string) (*fv1.File, error) {
+	f, err := s.fileGetClient.GetFile(ctx, &fv1.GetFileRequest{Id: fileID})
+	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			return status.Errorf(codes.InvalidArgument, "file %q not found", fileID)
+			return nil, status.Errorf(codes.InvalidArgument, "file %q not found", fileID)
 		}
-		return status.Errorf(codes.Internal, "get file: %s", err)
+		return nil, status.Errorf(codes.Internal, "get file: %s", err)
 	}
-	return nil
+	return f, nil
 }
 
 func validateMetadata(metadata map[string]string) error {

@@ -16,6 +16,7 @@ import (
 
 const (
 	fileID          = "file0"
+	fileName        = "file0.txt"
 	vectorStoreName = "vector_store_1"
 	modelName       = "model"
 	dimensions      = 10
@@ -60,13 +61,13 @@ func TestCreateVectorStore(t *testing.T) {
 			srv := New(
 				st,
 				&noopFileGetClient{
-					ids: map[string]bool{
-						fileID: true,
+					ids: map[string]string{
+						fileID: fileName,
 					},
 				},
 				&noopFileInternalClient{
 					ids: map[string]string{
-						fileID: "test.txt",
+						fileID: fileName,
 					},
 				},
 				&noopVStoreClient{
@@ -85,6 +86,8 @@ func TestCreateVectorStore(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, vectorStoreName, resp.Name)
+			assert.Equal(t, int64(len(tc.req.FileIds)), resp.FileCounts.Total)
+			assert.Equal(t, int64(len(tc.req.FileIds)), resp.FileCounts.Completed)
 		})
 	}
 }
@@ -102,13 +105,13 @@ func TestListVectorStores(t *testing.T) {
 	srv := New(
 		st,
 		&noopFileGetClient{
-			ids: map[string]bool{
-				fileID: true,
+			ids: map[string]string{
+				fileID: fileName,
 			},
 		},
 		&noopFileInternalClient{
 			ids: map[string]string{
-				fileID: "test.txt",
+				fileID: fileName,
 			},
 		},
 		&noopVStoreClient{
@@ -382,13 +385,13 @@ func TestDeleteVectorStore(t *testing.T) {
 			srv := New(
 				st,
 				&noopFileGetClient{
-					ids: map[string]bool{
-						fileID: true,
+					ids: map[string]string{
+						fileID: fileName,
 					},
 				},
 				&noopFileInternalClient{
 					ids: map[string]string{
-						fileID: "test.txt",
+						fileID: fileName,
 					},
 				},
 				&noopVStoreClient{
@@ -471,13 +474,13 @@ func TestUpdateVectorStore(t *testing.T) {
 			srv := New(
 				st,
 				&noopFileGetClient{
-					ids: map[string]bool{
-						fileID: true,
+					ids: map[string]string{
+						fileID: fileName,
 					},
 				},
 				&noopFileInternalClient{
 					ids: map[string]string{
-						fileID: "test.txt",
+						fileID: fileName,
 					},
 				},
 				&noopVStoreClient{
@@ -503,15 +506,19 @@ func TestUpdateVectorStore(t *testing.T) {
 }
 
 type noopFileGetClient struct {
-	ids map[string]bool
+	ids map[string]string
 }
 
 func (c *noopFileGetClient) GetFile(ctx context.Context, in *fv1.GetFileRequest, opts ...grpc.CallOption) (*fv1.File, error) {
-	if _, ok := c.ids[in.Id]; !ok {
+	name, ok := c.ids[in.Id]
+	if !ok {
 		return nil, status.Error(codes.NotFound, "file not found")
 	}
 
-	return &fv1.File{}, nil
+	return &fv1.File{
+		Id:       in.Id,
+		Filename: name,
+	}, nil
 }
 
 type noopFileInternalClient struct {
@@ -563,14 +570,14 @@ type noopEmbedder struct {
 }
 
 func (c *noopEmbedder) AddFile(ctx context.Context, collectionName, modelName, fileID, fileName, filePath string, chunkSizeTokens, chunkOverlapTokens int64) error {
-	if collectionName == c.collectionName {
+	if c.collectionName == "" || collectionName == c.collectionName {
 		return nil
 	}
 	return fmt.Errorf("collection %s not found", collectionName)
 }
 
 func (c *noopEmbedder) DeleteFile(ctx context.Context, collectionName, fileID string) error {
-	if collectionName == c.collectionName {
+	if c.collectionName == "" || collectionName == c.collectionName {
 		return nil
 	}
 	return fmt.Errorf("collection %s not found", collectionName)

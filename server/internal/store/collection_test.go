@@ -190,6 +190,7 @@ func TestUpdateCollection(t *testing.T) {
 	nc := c
 	nc.Name = "new name"
 	nc.Status = CollectionStatusExpired
+	nc.FileCountsCompleted = 10
 	err = st.UpdateCollection(&nc)
 	assert.NoError(t, err)
 
@@ -197,6 +198,7 @@ func TestUpdateCollection(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, nc.Name, got.Name)
 	assert.Equal(t, nc.Status, got.Status)
+	assert.Equal(t, nc.FileCountsCompleted, got.FileCountsCompleted)
 }
 
 func TestDeleteCollection(t *testing.T) {
