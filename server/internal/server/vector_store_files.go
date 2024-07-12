@@ -95,7 +95,7 @@ func (s *S) CreateVectorStoreFile(
 		FileID:               req.FileId,
 		VectorStoreID:        req.VectorStoreId,
 		UsageBytes:           0,
-		Status:               store.FileStatusInProgress,
+		Status:               store.FileStatusCompleted,
 		ChunkingStrategyType: store.ChunkingStrategyType(req.ChunkingStrategy.Type),
 		MaxChunkSizeTokens:   maxChunkSizeTokens,
 		ChunkOverlapTokens:   chunkOverlapTokens,
