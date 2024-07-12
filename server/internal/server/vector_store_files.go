@@ -25,6 +25,12 @@ const (
 	defaultChunkOverlapTokens = int64(400)
 )
 
+type chunkingStrategy struct {
+	maxChunkSizeTokens   int64
+	chunkOverlapTokens   int64
+	chunkingStrategyType store.ChunkingStrategyType
+}
+
 // CreateVectorStoreFile adds a new file to the vector store.
 func (s *S) CreateVectorStoreFile(
 	ctx context.Context,
@@ -42,24 +48,9 @@ func (s *S) CreateVectorStoreFile(
 		return nil, status.Error(codes.InvalidArgument, "file id is required")
 	}
 
-	maxChunkSizeTokens := defaultMaxChunkSizeTokens
-	chunkOverlapTokens := defaultChunkOverlapTokens
-	if cs := req.ChunkingStrategy; cs != nil {
-		if err := validateChunkingStrategy(cs); err != nil {
-			return nil, err
-		}
-		if cs.Static != nil {
-			maxChunkSizeTokens = cs.Static.MaxChunkSizeTokens
-			chunkOverlapTokens = cs.Static.ChunkOverlapTokens
-		}
-	} else {
-		// TODO(kenji): The OpenAI API reference says the strategy is always "static".
-		// https://platform.openai.com/docs/api-reference/vector-stores-files/file-object
-		//
-		// We might need to do the conversion.
-		req.ChunkingStrategy = &v1.ChunkingStrategy{
-			Type: string(store.ChunkingStrategyTypeAuto),
-		}
+	cs, err := getChunkingStrategy(req.ChunkingStrategy)
+	if err != nil {
+		return nil, err
 	}
 
 	c, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, req.VectorStoreId)
@@ -70,42 +61,82 @@ func (s *S) CreateVectorStoreFile(
 		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
 	}
 
-	file, err := s.fileGetClient.GetFile(auth.CarryMetadata(ctx), &fv1.GetFileRequest{Id: req.FileId})
+	file, err := s.validateFile(auth.CarryMetadata(ctx), req.FileId)
 	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			return nil, status.Errorf(codes.InvalidArgument, "file %q not found", req.FileId)
-		}
-		return nil, status.Errorf(codes.Internal, "get file: %s", err)
+		return nil, err
+	}
+	f, err := s.createVectorStoreFile(ctx, c, file, cs)
+	if err != nil {
+		return nil, err
 	}
 
-	if _, err := s.store.GetFileByFileID(req.VectorStoreId, req.FileId); err == nil {
-		return nil, status.Errorf(codes.AlreadyExists, "file %q already exists in vector store %q", req.FileId, req.VectorStoreId)
+	c, err = s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, c.VectorStoreID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
+	}
+	c.FileCountsCompleted++
+	c.FileCountsTotal++
+	if err := s.store.UpdateCollection(c); err != nil {
+		return nil, status.Errorf(codes.Internal, "update collection: %s", err)
+	}
+	return toVectorStoreFileProto(f), nil
+}
+
+func (s *S) createVectorStoreFile(ctx context.Context, c *store.Collection, f *fv1.File, cs *chunkingStrategy) (*store.File, error) {
+	if _, err := s.store.GetFileByFileID(c.VectorStoreID, f.Id); err == nil {
+		return nil, status.Errorf(codes.AlreadyExists, "file %q already exists in vector store %q", f.Id, c.VectorStoreID)
 	}
 
-	resp, err := s.fileInternalClient.GetFilePath(ctx, &fv1.GetFilePathRequest{Id: req.FileId})
+	resp, err := s.fileInternalClient.GetFilePath(ctx, &fv1.GetFilePathRequest{Id: f.Id})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get file path: %s", err)
 	}
 
-	log.Printf("Added file %q to vector store %q.\n", req.FileId, req.VectorStoreId)
-	if err := s.embedder.AddFile(ctx, c.VectorStoreID, c.EmbeddingModel, req.FileId, file.Filename, resp.Path, maxChunkSizeTokens, chunkOverlapTokens); err != nil {
+	log.Printf("Adding file %q to vector store %q.\n", f.Id, c.VectorStoreID)
+	if err := s.embedder.AddFile(
+		ctx,
+		c.VectorStoreID,
+		c.EmbeddingModel,
+		f.Id,
+		f.Filename,
+		resp.Path,
+		cs.maxChunkSizeTokens,
+		cs.chunkOverlapTokens,
+	); err != nil {
 		return nil, status.Errorf(codes.Internal, "add file: %s", err)
 	}
-	f := &store.File{
-		FileID:               req.FileId,
-		VectorStoreID:        req.VectorStoreId,
+	file := &store.File{
+		FileID:               f.Id,
+		VectorStoreID:        c.VectorStoreID,
 		UsageBytes:           0,
 		Status:               store.FileStatusCompleted,
-		ChunkingStrategyType: store.ChunkingStrategyType(req.ChunkingStrategy.Type),
-		MaxChunkSizeTokens:   maxChunkSizeTokens,
-		ChunkOverlapTokens:   chunkOverlapTokens,
+		ChunkingStrategyType: cs.chunkingStrategyType,
+		MaxChunkSizeTokens:   cs.maxChunkSizeTokens,
+		ChunkOverlapTokens:   cs.chunkOverlapTokens,
 	}
-	if err := s.store.CreateFile(f); err != nil {
+	if err := s.store.CreateFile(file); err != nil {
 		return nil, status.Errorf(codes.Internal, "create file: %s", err)
 	}
-	log.Printf("Added file %q to vector store %q", f.FileID, f.VectorStoreID)
+	log.Printf("Added file %q to vector store %q", file.FileID, file.VectorStoreID)
+	return file, nil
+}
 
-	return toVectorStoreFileProto(f), nil
+func getChunkingStrategy(cs *v1.ChunkingStrategy) (*chunkingStrategy, error) {
+	ret := &chunkingStrategy{
+		maxChunkSizeTokens:   defaultMaxChunkSizeTokens,
+		chunkOverlapTokens:   defaultChunkOverlapTokens,
+		chunkingStrategyType: store.ChunkingStrategyTypeStatic,
+	}
+	if cs != nil {
+		if err := validateChunkingStrategy(cs); err != nil {
+			return nil, err
+		}
+		if cs.Static != nil {
+			ret.maxChunkSizeTokens = cs.Static.MaxChunkSizeTokens
+			ret.chunkOverlapTokens = cs.Static.ChunkOverlapTokens
+		}
+	}
+	return ret, nil
 }
 
 func validateChunkingStrategy(cs *v1.ChunkingStrategy) error {
@@ -266,6 +297,17 @@ func (s *S) DeleteVectorStoreFile(
 		}
 		return nil, status.Errorf(codes.Internal, "delete file: %s", err)
 	}
+
+	c, err := s.store.GetCollectionByVectorStoreID(userInfo.ProjectID, req.VectorStoreId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "get collection: %s", err)
+	}
+	c.FileCountsCompleted--
+	c.FileCountsTotal--
+	if err := s.store.UpdateCollection(c); err != nil {
+		return nil, status.Errorf(codes.Internal, "update collection: %s", err)
+	}
+
 	return &v1.DeleteVectorStoreFileResponse{
 		Id:      req.FileId,
 		Object:  vectorStoreFileObject,

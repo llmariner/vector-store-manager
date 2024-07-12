@@ -68,8 +68,8 @@ func TestCreateVectorStoreFile(t *testing.T) {
 			srv := New(
 				st,
 				&noopFileGetClient{
-					ids: map[string]bool{
-						fileID: true,
+					ids: map[string]string{
+						fileID: fileName,
 					},
 				},
 				&noopFileInternalClient{
@@ -106,7 +106,7 @@ func TestCreateVectorStoreFile(t *testing.T) {
 			assert.Equal(t, fileID, resp.Id)
 			assert.Equal(t, vectorStoreID, resp.VectorStoreId)
 			assert.Equal(t, vectorStoreFileObject, resp.Object)
-			assert.Equal(t, string(store.ChunkingStrategyTypeAuto), resp.ChunkingStrategy.Type)
+			assert.Equal(t, string(store.ChunkingStrategyTypeStatic), resp.ChunkingStrategy.Type)
 		})
 	}
 }
@@ -118,8 +118,8 @@ func TestCreateVectorStoreFile_AlreadyExists(t *testing.T) {
 	srv := New(
 		st,
 		&noopFileGetClient{
-			ids: map[string]bool{
-				fileID: true,
+			ids: map[string]string{
+				fileID: fileName,
 			},
 		},
 		&noopFileInternalClient{
@@ -229,10 +229,10 @@ func TestListVectorStoreFiles(t *testing.T) {
 			srv := New(
 				st,
 				&noopFileGetClient{
-					ids: map[string]bool{
-						fs[0]: true,
-						fs[1]: true,
-						fs[2]: true,
+					ids: map[string]string{
+						fs[0]: "test0.txt",
+						fs[1]: "test1.txt",
+						fs[2]: "test2.txt",
 					},
 				},
 				&noopFileInternalClient{
@@ -271,7 +271,7 @@ func TestListVectorStoreFiles(t *testing.T) {
 				assert.Equal(t, f, resp.Id)
 				assert.Equal(t, vectorStoreID, resp.VectorStoreId)
 				assert.Equal(t, vectorStoreFileObject, resp.Object)
-				assert.Equal(t, string(store.ChunkingStrategyTypeAuto), resp.ChunkingStrategy.Type)
+				assert.Equal(t, string(store.ChunkingStrategyTypeStatic), resp.ChunkingStrategy.Type)
 			}
 
 			respList, err := srv.ListVectorStoreFiles(ctx, tc.req)
@@ -336,8 +336,8 @@ func TestGetVectorStoreFile(t *testing.T) {
 			srv := New(
 				st,
 				&noopFileGetClient{
-					ids: map[string]bool{
-						fileID: true,
+					ids: map[string]string{
+						fileID: fileName,
 					},
 				},
 				&noopFileInternalClient{
@@ -424,8 +424,8 @@ func TestDeleteVectorStoreFile(t *testing.T) {
 			srv := New(
 				st,
 				&noopFileGetClient{
-					ids: map[string]bool{
-						fileID: true,
+					ids: map[string]string{
+						fileID: fileName,
 					},
 				},
 				&noopFileInternalClient{
