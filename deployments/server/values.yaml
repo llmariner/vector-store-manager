@@ -42,6 +42,11 @@ image:
   repository: public.ecr.aws/cloudnatix/llm-operator/vector-store-manager-server
   pullPolicy: IfNotPresent
 
+podAnnotations:
+nodeSelector:
+affinity:
+tolerations:
+
 version:
 
 database:
