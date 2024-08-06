@@ -17,7 +17,8 @@ const (
 	charactersPerToken = 4
 )
 
-type llmClient interface {
+// LLMClient is an interface to handle embedding requests.
+type LLMClient interface {
 	Embed(ctx context.Context, modelName, prompt string) ([]float32, error)
 	PullModel(ctx context.Context, modelName string) error
 }
@@ -35,14 +36,14 @@ type vstoreClient interface {
 
 // E is an embedder.
 type E struct {
-	llmClient    llmClient
+	llmClient    LLMClient
 	s3Client     s3Client
 	vstoreClient vstoreClient
 }
 
 // New creates a new Embedder.
 func New(
-	llmClient llmClient,
+	llmClient LLMClient,
 	s3Client s3Client,
 	vstoreClient vstoreClient,
 ) *E {

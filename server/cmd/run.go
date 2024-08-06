@@ -9,6 +9,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/llm-operator/common/pkg/db"
 	fv1 "github.com/llm-operator/file-manager/api/v1"
+	"github.com/llm-operator/inference-manager/pkg/llmkind"
 	"github.com/llm-operator/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/vector-store-manager/api/v1"
 	"github.com/llm-operator/vector-store-manager/server/internal/config"
@@ -18,6 +19,7 @@ import (
 	"github.com/llm-operator/vector-store-manager/server/internal/s3"
 	"github.com/llm-operator/vector-store-manager/server/internal/server"
 	"github.com/llm-operator/vector-store-manager/server/internal/store"
+	"github.com/llm-operator/vector-store-manager/server/internal/vllm"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -99,15 +101,27 @@ func run(ctx context.Context, c *config.Config) error {
 		return err
 	}
 
-	o := ollama.New(c.OllamaServerAddr)
-
-	s3Client := s3.NewClient(c.ObjectStore.S3)
-	e := embedder.New(o, s3Client, vstoreClient)
-
-	dim, err := ollama.Dimension(c.Model)
-	if err != nil {
-		return err
+	var llm embedder.LLMClient
+	var dim int
+	switch c.LLMEngine {
+	case llmkind.Ollama:
+		llm = ollama.New(c.LLMEngineAddr)
+		dim, err = ollama.Dimension(c.Model)
+		if err != nil {
+			return err
+		}
+	case llmkind.VLLM:
+		llm = vllm.NewClient(c.LLMEngineAddr)
+		dim, err = vllm.Dimension(c.Model)
+		if err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("unsupported llm engine: %s", c.LLMEngine)
 	}
+	s3Client := s3.NewClient(c.ObjectStore.S3)
+	e := embedder.New(llm, s3Client, vstoreClient)
+
 	s := server.New(st, fclient, fwClient, vstoreClient, e, c.Model, dim)
 
 	errCh := make(chan error)

@@ -33,7 +33,8 @@ internalGrpcPort: 8083
 # The following default values work if the services run in the same namespace.
 fileManagerServerAddr: file-manager-server-grpc:8081
 fileManagerServerInternalAddr: file-manager-server-internal-grpc:8083
-ollamaServerAddr: inference-manager-engine-ollama:8080
+llmEngineAddr: inference-manager-engine-llm:8080
+llmEngine: ollama
 
 model: all-minilm
 
