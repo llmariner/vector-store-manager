@@ -11,7 +11,8 @@ data:
     internalGrpcPort: {{ .Values.internalGrpcPort }}
     fileManagerServerAddr: {{ .Values.fileManagerServerAddr }}
     fileManagerServerInternalAddr: {{ .Values.fileManagerServerInternalAddr }}
-    ollamaServerAddr: {{ .Values.ollamaServerAddr }}
+    llmEngineAddr: {{ .Values.llmEngineAddr }}
+    llmEngine: {{ .Values.llmEngine }}
     model: {{ .Values.model }}
     database:
       host: {{ .Values.global.database.host }}

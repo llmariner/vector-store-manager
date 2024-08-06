@@ -1,12 +1,13 @@
-package ollama
+package vllm
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Dimension returns the dimension of the model.
 func Dimension(model string) (int, error) {
 	dimsByModel := map[string]int{
-		"all-minilm":       384,
-		"nomic-embed-text": 768,
+		"intfloat/e5-mistral-7b-instruct": 4096,
 	}
 	dim, ok := dimsByModel[model]
 	if !ok {
