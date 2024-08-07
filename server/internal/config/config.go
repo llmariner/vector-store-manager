@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/llm-operator/common/pkg/db"
+	"github.com/llm-operator/inference-manager/pkg/llmkind"
 	"gopkg.in/yaml.v3"
 )
 
@@ -54,7 +55,8 @@ type Config struct {
 	HTTPPort         int `yaml:"httpPort"`
 	InternalGRPCPort int `yaml:"internalGrpcPort"`
 
-	OllamaServerAddr              string `yaml:"ollamaServerAddr"`
+	LLMEngine                     string `yaml:"llmEngine"`
+	LLMEngineAddr                 string `yaml:"llmEngineAddr"`
 	FileManagerServerAddr         string `yaml:"fileManagerServerAddr"`
 	FileManagerServerInternalAddr string `yaml:"fileManagerServerInternalAddr"`
 
@@ -79,8 +81,8 @@ func (c *Config) Validate() error {
 	if c.InternalGRPCPort <= 0 {
 		return fmt.Errorf("internalGrpcPort must be greater than 0")
 	}
-	if c.OllamaServerAddr == "" {
-		return fmt.Errorf("ollama server addr must be set")
+	if c.LLMEngineAddr == "" {
+		return fmt.Errorf("LLM engine addr must be set")
 	}
 	if c.FileManagerServerAddr == "" {
 		return fmt.Errorf("file manager address must be set")
@@ -102,6 +104,12 @@ func (c *Config) Validate() error {
 	}
 	if err := c.AuthConfig.Validate(); err != nil {
 		return err
+	}
+	switch c.LLMEngine {
+	case llmkind.Ollama, llmkind.VLLM:
+		break
+	default:
+		return fmt.Errorf("unsupported llm engine: %q", c.LLMEngine)
 	}
 	return nil
 }
