@@ -13,6 +13,8 @@ import (
 	"github.com/llm-operator/vector-store-manager/server/internal/store"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
@@ -96,13 +98,25 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 		if err != nil {
 			return err
 		}
-		opts = append(opts, grpc.ChainUnaryInterceptor(ai.Unary()))
+		authFn := ai.Unary()
+		healthSkip := func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+			if info.FullMethod == "/grpc.health.v1.Health/Check" {
+				// Skip authentication for health check
+				return handler(ctx, req)
+			}
+			return authFn(ctx, req, info, handler)
+		}
+		opts = append(opts, grpc.ChainUnaryInterceptor(healthSkip))
 		s.enableAuth = true
 	}
 
 	grpcServer := grpc.NewServer(opts...)
 	v1.RegisterVectorStoreServiceServer(grpcServer, s)
 	reflection.Register(grpcServer)
+
+	healthCheck := health.NewServer()
+	healthCheck.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthCheck)
 
 	s.srv = grpcServer
 

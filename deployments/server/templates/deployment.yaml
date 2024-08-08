@@ -19,8 +19,12 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
       - name: vector-store-manager-server
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
         image: "{{ .Values.image.repository }}:{{ default .Chart.Version .Values.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
@@ -41,6 +45,8 @@ spec:
         - name: config
           mountPath: /etc/config
           readOnly: true
+        - name: tmp
+          mountPath: /tmp
         env:
         - name: DB_PASSWORD
           valueFrom:
@@ -66,6 +72,10 @@ spec:
               key: {{ .secretAccessKeyKey }}
         {{- end }}
         {{- end }}
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -82,3 +92,5 @@ spec:
       - name: config
         configMap:
           name: {{ include "vector-store-manager-server.fullname" . }}
+      - name: tmp
+        emptyDir:
