@@ -23,3 +23,8 @@ go.work.sum
 
 # Directory where binaries are stored.
 bin/
+
+# javascript
+node_modules/
+package-lock.json
+yarn.lock
