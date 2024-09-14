@@ -3,6 +3,10 @@ global:
     host:
     port:
     username:
+    ssl:
+      mode:
+      rootCert:
+
   databaseSecret:
     name:
     key:
@@ -58,6 +62,7 @@ vectorDatabase:
   port: 19530
   username: root
   database: default
+
 vectorDatabaseSecret:
   name: vector-store
   key: password
@@ -81,7 +86,7 @@ livenessProbe:
 podSecurityContext:
   fsGroup: 2000
 securityContext:
-  readOnlyRootFilesystem: true  
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
     - ALL
