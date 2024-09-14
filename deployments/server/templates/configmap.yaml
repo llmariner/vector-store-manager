@@ -20,6 +20,9 @@ data:
       database: {{ .Values.database.database }}
       username: {{ .Values.global.database.username }}
       passwordEnvName: DB_PASSWORD
+      ssl:
+        model: {{ .Values.global.database.ssl.mode }}
+        rootCert: {{ .Values.global.database.ssl.rootCert }}
     vectorDatabase:
       host: {{ .Values.vectorDatabase.host }}
       port: {{ .Values.vectorDatabase.port }}

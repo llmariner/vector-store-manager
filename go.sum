@@ -225,8 +225,8 @@ github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80/go.mod h1:imJHygn/1
 github.com/leodido/go-urn v1.2.0/go.mod h1:+8+nEpDfqqsY+g338gtMEUOtuK+4dEMhiQEgxpxOKII=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
-github.com/llm-operator/common v0.4.0 h1:58GLWPhshh9PPNcl2Vu2so7IvINc0RUz3wre67UU4w4=
-github.com/llm-operator/common v0.4.0/go.mod h1:NQpm0/EQnyXz/a67TftLWF3Ju0hgaalViND67s2sRVs=
+github.com/llm-operator/common v0.5.0 h1:ZeXqmMxrAcP3DZya7j46V/r7W54OtkbH2lM6eE+z6h8=
+github.com/llm-operator/common v0.5.0/go.mod h1:NQpm0/EQnyXz/a67TftLWF3Ju0hgaalViND67s2sRVs=
 github.com/llm-operator/file-manager v0.51.0 h1:F/UhXUV5AN9hyoxsA+3wTgy8dz9M2bDxQ5O/Yxzlkw4=
 github.com/llm-operator/file-manager v0.51.0/go.mod h1:uMpiPdmLfgn6Ecb03Z1KME4ZX6z8ZQcVwDVeYBmn8Bo=
 github.com/llm-operator/inference-manager v0.192.0 h1:w0pyA23+QCDeI3nM8LnRMarlLa5jIg4DFe7/ECUry8Y=
