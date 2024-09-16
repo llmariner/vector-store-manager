@@ -62,6 +62,8 @@ vectorDatabase:
   port: 19530
   username: root
   database: default
+  ssl:
+    mode: disable
 
 vectorDatabaseSecret:
   name: vector-store
