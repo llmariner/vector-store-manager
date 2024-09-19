@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/aws/aws-sdk-go v1.51.23
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
-	github.com/llm-operator/common v0.5.0
+	github.com/llm-operator/common v0.6.0
 	github.com/llm-operator/file-manager v0.51.0
 	github.com/llm-operator/inference-manager v0.192.0
 	github.com/llm-operator/rbac-manager v0.83.0
