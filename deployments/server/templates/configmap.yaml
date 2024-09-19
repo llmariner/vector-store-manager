@@ -23,6 +23,8 @@ data:
       ssl:
         mode: {{ .Values.global.database.ssl.mode }}
         rootCert: {{ .Values.global.database.ssl.rootCert }}
+      createDatabase: {{ .Values.global.database.createDatabase }}
+      originalDatabase: {{ .Values.global.database.originalDatabase }}
     vectorDatabase:
       host: {{ .Values.vectorDatabase.host }}
       port: {{ .Values.vectorDatabase.port }}
