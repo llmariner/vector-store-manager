@@ -7,7 +7,7 @@ import (
 	"net"
 
 	fv1 "github.com/llm-operator/file-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/pkg/auth"
+	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llm-operator/vector-store-manager/api/v1"
 	"github.com/llm-operator/vector-store-manager/server/internal/config"
 	"github.com/llm-operator/vector-store-manager/server/internal/store"

@@ -231,8 +231,8 @@ github.com/llm-operator/file-manager v0.51.0 h1:F/UhXUV5AN9hyoxsA+3wTgy8dz9M2bDx
 github.com/llm-operator/file-manager v0.51.0/go.mod h1:uMpiPdmLfgn6Ecb03Z1KME4ZX6z8ZQcVwDVeYBmn8Bo=
 github.com/llm-operator/inference-manager v0.192.0 h1:w0pyA23+QCDeI3nM8LnRMarlLa5jIg4DFe7/ECUry8Y=
 github.com/llm-operator/inference-manager v0.192.0/go.mod h1:IDHs4I0Q4/KI4h/N+b9a1VD+VSCHZnweDp3BMm3yJWE=
-github.com/llm-operator/rbac-manager v0.83.0 h1:UzBItVUEgH7xiWKh+US56lFst5aRX3u4OYDbj5RlZx0=
-github.com/llm-operator/rbac-manager v0.83.0/go.mod h1:fDJPucbAZE+R1m3VaU+vF7alVgrSirUoWqxnPKvMAGc=
+github.com/llmariner/rbac-manager v0.101.0 h1:QacLmhEisGR53yNitJwtLTlS7RtpveV8sUHMR0sI5qM=
+github.com/llmariner/rbac-manager v0.101.0/go.mod h1:Iw3nEUVyccxAnyaIle8048xaYFaplPrGGi1q23HV2mI=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-colorable v0.1.8/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=
