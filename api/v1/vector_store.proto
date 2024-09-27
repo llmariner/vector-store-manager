@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package llmoperator.vector_store.v1;
+package llmariner.vector_store.v1;
 
 import "google/api/annotations.proto";
 

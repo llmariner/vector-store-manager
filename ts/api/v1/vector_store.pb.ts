@@ -166,7 +166,7 @@ export class VectorStoreService {
     return fm.fetchReq<GetVectorStoreRequest, VectorStore>(`/v1/vector_stores/${req["id"]}?${fm.renderURLSearchParams(req, ["id"])}`, {...initReq, method: "GET"})
   }
   static GetVectorStoreByName(req: GetVectorStoreByNameRequest, initReq?: fm.InitReq): Promise<VectorStore> {
-    return fm.fetchReq<GetVectorStoreByNameRequest, VectorStore>(`/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<GetVectorStoreByNameRequest, VectorStore>(`/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreByName`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static UpdateVectorStore(req: UpdateVectorStoreRequest, initReq?: fm.InitReq): Promise<VectorStore> {
     return fm.fetchReq<UpdateVectorStoreRequest, VectorStore>(`/v1/vector_stores/${req["id"]}`, {...initReq, method: "POST", body: JSON.stringify(req)})
@@ -189,6 +189,6 @@ export class VectorStoreService {
 }
 export class VectorStoreInternalService {
   static SearchVectorStore(req: SearchVectorStoreRequest, initReq?: fm.InitReq): Promise<SearchVectorStoreResponse> {
-    return fm.fetchReq<SearchVectorStoreRequest, SearchVectorStoreResponse>(`/llmoperator.vector_store.v1.VectorStoreInternalService/SearchVectorStore`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<SearchVectorStoreRequest, SearchVectorStoreResponse>(`/llmariner.vector_store.v1.VectorStoreInternalService/SearchVectorStore`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
 }

@@ -40,7 +40,7 @@ func NewVectorStoreServiceClient(cc grpc.ClientConnInterface) VectorStoreService
 
 func (c *vectorStoreServiceClient) CreateVectorStore(ctx context.Context, in *CreateVectorStoreRequest, opts ...grpc.CallOption) (*VectorStore, error) {
 	out := new(VectorStore)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *vectorStoreServiceClient) CreateVectorStore(ctx context.Context, in *Cr
 
 func (c *vectorStoreServiceClient) ListVectorStores(ctx context.Context, in *ListVectorStoresRequest, opts ...grpc.CallOption) (*ListVectorStoresResponse, error) {
 	out := new(ListVectorStoresResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStores", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/ListVectorStores", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *vectorStoreServiceClient) ListVectorStores(ctx context.Context, in *Lis
 
 func (c *vectorStoreServiceClient) GetVectorStore(ctx context.Context, in *GetVectorStoreRequest, opts ...grpc.CallOption) (*VectorStore, error) {
 	out := new(VectorStore)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/GetVectorStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (c *vectorStoreServiceClient) GetVectorStore(ctx context.Context, in *GetVe
 
 func (c *vectorStoreServiceClient) GetVectorStoreByName(ctx context.Context, in *GetVectorStoreByNameRequest, opts ...grpc.CallOption) (*VectorStore, error) {
 	out := new(VectorStore)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreByName", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *vectorStoreServiceClient) GetVectorStoreByName(ctx context.Context, in 
 
 func (c *vectorStoreServiceClient) UpdateVectorStore(ctx context.Context, in *UpdateVectorStoreRequest, opts ...grpc.CallOption) (*VectorStore, error) {
 	out := new(VectorStore)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/UpdateVectorStore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/UpdateVectorStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (c *vectorStoreServiceClient) UpdateVectorStore(ctx context.Context, in *Up
 
 func (c *vectorStoreServiceClient) DeleteVectorStore(ctx context.Context, in *DeleteVectorStoreRequest, opts ...grpc.CallOption) (*DeleteVectorStoreResponse, error) {
 	out := new(DeleteVectorStoreResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (c *vectorStoreServiceClient) DeleteVectorStore(ctx context.Context, in *De
 
 func (c *vectorStoreServiceClient) CreateVectorStoreFile(ctx context.Context, in *CreateVectorStoreFileRequest, opts ...grpc.CallOption) (*VectorStoreFile, error) {
 	out := new(VectorStoreFile)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStoreFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStoreFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (c *vectorStoreServiceClient) CreateVectorStoreFile(ctx context.Context, in
 
 func (c *vectorStoreServiceClient) ListVectorStoreFiles(ctx context.Context, in *ListVectorStoreFilesRequest, opts ...grpc.CallOption) (*ListVectorStoreFilesResponse, error) {
 	out := new(ListVectorStoreFilesResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStoreFiles", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/ListVectorStoreFiles", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (c *vectorStoreServiceClient) ListVectorStoreFiles(ctx context.Context, in 
 
 func (c *vectorStoreServiceClient) GetVectorStoreFile(ctx context.Context, in *GetVectorStoreFileRequest, opts ...grpc.CallOption) (*VectorStoreFile, error) {
 	out := new(VectorStoreFile)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (c *vectorStoreServiceClient) GetVectorStoreFile(ctx context.Context, in *G
 
 func (c *vectorStoreServiceClient) DeleteVectorStoreFile(ctx context.Context, in *DeleteVectorStoreFileRequest, opts ...grpc.CallOption) (*DeleteVectorStoreFileResponse, error) {
 	out := new(DeleteVectorStoreFileResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStoreFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStoreFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func _VectorStoreService_CreateVectorStore_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStore",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).CreateVectorStore(ctx, req.(*CreateVectorStoreRequest))
@@ -220,7 +220,7 @@ func _VectorStoreService_ListVectorStores_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStores",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/ListVectorStores",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).ListVectorStores(ctx, req.(*ListVectorStoresRequest))
@@ -238,7 +238,7 @@ func _VectorStoreService_GetVectorStore_Handler(srv interface{}, ctx context.Con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStore",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/GetVectorStore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).GetVectorStore(ctx, req.(*GetVectorStoreRequest))
@@ -256,7 +256,7 @@ func _VectorStoreService_GetVectorStoreByName_Handler(srv interface{}, ctx conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreByName",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).GetVectorStoreByName(ctx, req.(*GetVectorStoreByNameRequest))
@@ -274,7 +274,7 @@ func _VectorStoreService_UpdateVectorStore_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/UpdateVectorStore",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/UpdateVectorStore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).UpdateVectorStore(ctx, req.(*UpdateVectorStoreRequest))
@@ -292,7 +292,7 @@ func _VectorStoreService_DeleteVectorStore_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStore",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).DeleteVectorStore(ctx, req.(*DeleteVectorStoreRequest))
@@ -310,7 +310,7 @@ func _VectorStoreService_CreateVectorStoreFile_Handler(srv interface{}, ctx cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStoreFile",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStoreFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).CreateVectorStoreFile(ctx, req.(*CreateVectorStoreFileRequest))
@@ -328,7 +328,7 @@ func _VectorStoreService_ListVectorStoreFiles_Handler(srv interface{}, ctx conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStoreFiles",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/ListVectorStoreFiles",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).ListVectorStoreFiles(ctx, req.(*ListVectorStoreFilesRequest))
@@ -346,7 +346,7 @@ func _VectorStoreService_GetVectorStoreFile_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreFile",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).GetVectorStoreFile(ctx, req.(*GetVectorStoreFileRequest))
@@ -364,7 +364,7 @@ func _VectorStoreService_DeleteVectorStoreFile_Handler(srv interface{}, ctx cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStoreFile",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStoreFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreServiceServer).DeleteVectorStoreFile(ctx, req.(*DeleteVectorStoreFileRequest))
@@ -376,7 +376,7 @@ func _VectorStoreService_DeleteVectorStoreFile_Handler(srv interface{}, ctx cont
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var VectorStoreService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "llmoperator.vector_store.v1.VectorStoreService",
+	ServiceName: "llmariner.vector_store.v1.VectorStoreService",
 	HandlerType: (*VectorStoreServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -441,7 +441,7 @@ func NewVectorStoreInternalServiceClient(cc grpc.ClientConnInterface) VectorStor
 
 func (c *vectorStoreInternalServiceClient) SearchVectorStore(ctx context.Context, in *SearchVectorStoreRequest, opts ...grpc.CallOption) (*SearchVectorStoreResponse, error) {
 	out := new(SearchVectorStoreResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreInternalService/SearchVectorStore", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.vector_store.v1.VectorStoreInternalService/SearchVectorStore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -487,7 +487,7 @@ func _VectorStoreInternalService_SearchVectorStore_Handler(srv interface{}, ctx 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.vector_store.v1.VectorStoreInternalService/SearchVectorStore",
+		FullMethod: "/llmariner.vector_store.v1.VectorStoreInternalService/SearchVectorStore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VectorStoreInternalServiceServer).SearchVectorStore(ctx, req.(*SearchVectorStoreRequest))
@@ -499,7 +499,7 @@ func _VectorStoreInternalService_SearchVectorStore_Handler(srv interface{}, ctx 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var VectorStoreInternalService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "llmoperator.vector_store.v1.VectorStoreInternalService",
+	ServiceName: "llmariner.vector_store.v1.VectorStoreInternalService",
 	HandlerType: (*VectorStoreInternalServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

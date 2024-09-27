@@ -15,7 +15,7 @@ export class VectorStoreService {
         return fm.fetchReq(`/v1/vector_stores/${req["id"]}?${fm.renderURLSearchParams(req, ["id"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static GetVectorStoreByName(req, initReq) {
-        return fm.fetchReq(`/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreByName`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static UpdateVectorStore(req, initReq) {
         return fm.fetchReq(`/v1/vector_stores/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
@@ -38,6 +38,6 @@ export class VectorStoreService {
 }
 export class VectorStoreInternalService {
     static SearchVectorStore(req, initReq) {
-        return fm.fetchReq(`/llmoperator.vector_store.v1.VectorStoreInternalService/SearchVectorStore`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/llmariner.vector_store.v1.VectorStoreInternalService/SearchVectorStore`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
 }

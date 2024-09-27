@@ -567,7 +567,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -590,7 +590,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStores", runtime.WithHTTPPathPattern("/v1/vector_stores"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/ListVectorStores", runtime.WithHTTPPathPattern("/v1/vector_stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -613,7 +613,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/GetVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -636,7 +636,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/UpdateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/UpdateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -659,7 +659,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -682,7 +682,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -705,7 +705,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStoreFiles", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/ListVectorStoreFiles", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -728,7 +728,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -751,7 +751,7 @@ func RegisterVectorStoreServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -813,7 +813,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -833,7 +833,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStores", runtime.WithHTTPPathPattern("/v1/vector_stores"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/ListVectorStores", runtime.WithHTTPPathPattern("/v1/vector_stores"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -853,7 +853,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/GetVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -873,7 +873,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/UpdateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/UpdateVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -893,7 +893,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStore", runtime.WithHTTPPathPattern("/v1/vector_stores/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -913,7 +913,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/CreateVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/CreateVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -933,7 +933,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/ListVectorStoreFiles", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/ListVectorStoreFiles", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -953,7 +953,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/GetVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -973,7 +973,7 @@ func RegisterVectorStoreServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmoperator.vector_store.v1.VectorStoreService/DeleteVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/llmariner.vector_store.v1.VectorStoreService/DeleteVectorStoreFile", runtime.WithHTTPPathPattern("/v1/vector_stores/{vector_store_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
