@@ -45,6 +45,10 @@ llmEngine: ollama
 model: all-minilm
 
 replicaCount: 1
+
+serviceAccount:
+  create: true
+
 image:
   repository: public.ecr.aws/cloudnatix/llmariner/vector-store-manager-server
   pullPolicy: IfNotPresent
