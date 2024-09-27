@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	gerrors "github.com/llm-operator/common/pkg/gormlib/errors"
+	gerrors "github.com/llmariner/common/pkg/gormlib/errors"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )

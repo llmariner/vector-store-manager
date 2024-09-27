@@ -22,4 +22,4 @@ build-server:
 
 .PHONY: build-docker-server
 build-docker-server:
-	docker build --build-arg TARGETARCH=amd64 -t llm-operator/vector-store-manager-server:latest -f build/server/Dockerfile .
+	docker build --build-arg TARGETARCH=amd64 -t llmariner/vector-store-manager-server:latest -f build/server/Dockerfile .

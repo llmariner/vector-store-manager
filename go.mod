@@ -1,13 +1,13 @@
-module github.com/llm-operator/vector-store-manager
+module github.com/llmariner/vector-store-manager
 
 go 1.22.2
 
 require (
 	github.com/aws/aws-sdk-go v1.51.23
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
-	github.com/llm-operator/common v0.6.0
 	github.com/llm-operator/file-manager v0.51.0
 	github.com/llm-operator/inference-manager v0.192.0
+	github.com/llmariner/common v0.7.0
 	github.com/llmariner/rbac-manager v0.101.0
 	github.com/milvus-io/milvus-sdk-go/v2 v2.4.0
 	github.com/ollama/ollama v0.1.44

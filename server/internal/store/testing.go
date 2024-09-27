@@ -3,7 +3,7 @@ package store
 import (
 	"testing"
 
-	"github.com/llm-operator/common/pkg/gormlib/testdb"
+	"github.com/llmariner/common/pkg/gormlib/testdb"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/llm-operator/common/pkg/db"
 	"github.com/llm-operator/inference-manager/pkg/llmkind"
+	"github.com/llmariner/common/pkg/db"
 	"gopkg.in/yaml.v3"
 )
 

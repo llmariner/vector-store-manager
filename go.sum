@@ -225,12 +225,12 @@ github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80/go.mod h1:imJHygn/1
 github.com/leodido/go-urn v1.2.0/go.mod h1:+8+nEpDfqqsY+g338gtMEUOtuK+4dEMhiQEgxpxOKII=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
-github.com/llm-operator/common v0.6.0 h1:yFeqFofKElPZhOtW67ui7WhivF0fUcyHEQNJlWby3aU=
-github.com/llm-operator/common v0.6.0/go.mod h1:NQpm0/EQnyXz/a67TftLWF3Ju0hgaalViND67s2sRVs=
 github.com/llm-operator/file-manager v0.51.0 h1:F/UhXUV5AN9hyoxsA+3wTgy8dz9M2bDxQ5O/Yxzlkw4=
 github.com/llm-operator/file-manager v0.51.0/go.mod h1:uMpiPdmLfgn6Ecb03Z1KME4ZX6z8ZQcVwDVeYBmn8Bo=
 github.com/llm-operator/inference-manager v0.192.0 h1:w0pyA23+QCDeI3nM8LnRMarlLa5jIg4DFe7/ECUry8Y=
 github.com/llm-operator/inference-manager v0.192.0/go.mod h1:IDHs4I0Q4/KI4h/N+b9a1VD+VSCHZnweDp3BMm3yJWE=
+github.com/llmariner/common v0.7.0 h1:uLX4axt65+4Xl+3/4OXwknnH1KuYQu3uVGiShADok9U=
+github.com/llmariner/common v0.7.0/go.mod h1:nRnAyKb2tbz4mx82JH+AiUwIlFqLoGzVyv07QRr+41g=
 github.com/llmariner/rbac-manager v0.101.0 h1:QacLmhEisGR53yNitJwtLTlS7RtpveV8sUHMR0sI5qM=
 github.com/llmariner/rbac-manager v0.101.0/go.mod h1:Iw3nEUVyccxAnyaIle8048xaYFaplPrGGi1q23HV2mI=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=

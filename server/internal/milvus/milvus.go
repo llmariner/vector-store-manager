@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/llm-operator/common/pkg/db"
+	"github.com/llmariner/common/pkg/db"
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 )

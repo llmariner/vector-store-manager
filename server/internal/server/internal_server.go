@@ -6,8 +6,8 @@ import (
 	"log"
 	"net"
 
-	v1 "github.com/llm-operator/vector-store-manager/api/v1"
-	v1legacy "github.com/llm-operator/vector-store-manager/api/v1/legacy"
+	v1 "github.com/llmariner/vector-store-manager/api/v1"
+	v1legacy "github.com/llmariner/vector-store-manager/api/v1/legacy"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

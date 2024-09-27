@@ -7,7 +7,7 @@
 package legacy
 
 import (
-	v1 "github.com/llm-operator/vector-store-manager/api/v1"
+	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"

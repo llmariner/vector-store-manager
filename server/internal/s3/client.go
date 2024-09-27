@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/llm-operator/vector-store-manager/server/internal/config"
+	"github.com/llmariner/vector-store-manager/server/internal/config"
 )
 
 const (
