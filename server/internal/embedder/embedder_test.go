@@ -138,7 +138,7 @@ func (c *noopLLMClient) PullModel(ctx context.Context, modelName string) error {
 type noopS3Client struct{}
 
 // Download is a no-op implementation of Download
-func (n *noopS3Client) Download(w io.WriterAt, key string) error {
+func (n *noopS3Client) Download(ctx context.Context, w io.WriterAt, key string) error {
 	return nil
 }
 

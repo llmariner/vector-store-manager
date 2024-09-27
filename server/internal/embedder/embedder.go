@@ -25,7 +25,7 @@ type LLMClient interface {
 
 // s3Client is an interface for an S3 client.
 type s3Client interface {
-	Download(w io.WriterAt, key string) error
+	Download(ctx context.Context, w io.WriterAt, key string) error
 }
 
 type vstoreClient interface {
@@ -76,7 +76,7 @@ func (e *E) AddFile(
 		}
 	}()
 
-	if err := e.s3Client.Download(f, filePath); err != nil {
+	if err := e.s3Client.Download(ctx, f, filePath); err != nil {
 		return fmt.Errorf("download: %s", err)
 	}
 	log.Printf("Downloaded file to %q\n", f.Name())

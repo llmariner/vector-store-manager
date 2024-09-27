@@ -39,6 +39,13 @@ data:
         endpointUrl: {{ .Values.global.objectStore.s3.endpointUrl }}
         region: {{ .Values.global.objectStore.s3.region }}
         bucket: {{ .Values.global.objectStore.s3.bucket }}
+        {{- with .Values.global.objectStore.s3.assumeRole }}
+        {{- if .roleArn }}
+        assumeRole:
+          roleArn: {{ .roleArn }}
+          externalId: {{ .externalId }}
+        {{- end }}
+        {{- end }}
     auth:
       enable: {{ .Values.global.auth.enable }}
       rbacInternalServerAddr: {{ .Values.global.auth.rbacInternalServerAddr }}
