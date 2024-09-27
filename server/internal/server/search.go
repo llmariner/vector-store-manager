@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	v1 "github.com/llm-operator/vector-store-manager/api/v1"
+	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

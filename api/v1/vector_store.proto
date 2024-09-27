@@ -4,7 +4,7 @@ package llmariner.vector_store.v1;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/llm-operator/vector-store-manager/api/v1";
+option go_package = "github.com/llmariner/vector-store-manager/api/v1";
 
 // The API specification follows OpenAPI API specification (https://platform.openai.com/docs/api-reference/vector-stores).
 

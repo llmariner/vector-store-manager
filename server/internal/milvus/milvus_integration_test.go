@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/llm-operator/common/pkg/db"
+	"github.com/llmariner/common/pkg/db"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	v1 "github.com/llm-operator/vector-store-manager/api/v1"
+	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 
