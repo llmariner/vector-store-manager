@@ -124,7 +124,10 @@ func run(ctx context.Context, c *config.Config) error {
 	default:
 		return fmt.Errorf("unsupported llm engine: %s", c.LLMEngine)
 	}
-	s3Client := s3.NewClient(c.ObjectStore.S3)
+	s3Client, err := s3.NewClient(ctx, c.ObjectStore.S3)
+	if err != nil {
+		return err
+	}
 	e := embedder.New(llm, s3Client, vstoreClient)
 
 	s := server.New(st, fclient, fwClient, vstoreClient, e, c.Model, dim)
