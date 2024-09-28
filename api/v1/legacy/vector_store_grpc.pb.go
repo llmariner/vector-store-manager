@@ -15,6 +15,94 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+// VectorStoreServiceClient is the client API for VectorStoreService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type VectorStoreServiceClient interface {
+	// Used by inference-manager-server.
+	GetVectorStoreByName(ctx context.Context, in *v1.GetVectorStoreByNameRequest, opts ...grpc.CallOption) (*v1.VectorStore, error)
+}
+
+type vectorStoreServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewVectorStoreServiceClient(cc grpc.ClientConnInterface) VectorStoreServiceClient {
+	return &vectorStoreServiceClient{cc}
+}
+
+func (c *vectorStoreServiceClient) GetVectorStoreByName(ctx context.Context, in *v1.GetVectorStoreByNameRequest, opts ...grpc.CallOption) (*v1.VectorStore, error) {
+	out := new(v1.VectorStore)
+	err := c.cc.Invoke(ctx, "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// VectorStoreServiceServer is the server API for VectorStoreService service.
+// All implementations must embed UnimplementedVectorStoreServiceServer
+// for forward compatibility
+type VectorStoreServiceServer interface {
+	// Used by inference-manager-server.
+	GetVectorStoreByName(context.Context, *v1.GetVectorStoreByNameRequest) (*v1.VectorStore, error)
+	mustEmbedUnimplementedVectorStoreServiceServer()
+}
+
+// UnimplementedVectorStoreServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedVectorStoreServiceServer struct {
+}
+
+func (UnimplementedVectorStoreServiceServer) GetVectorStoreByName(context.Context, *v1.GetVectorStoreByNameRequest) (*v1.VectorStore, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVectorStoreByName not implemented")
+}
+func (UnimplementedVectorStoreServiceServer) mustEmbedUnimplementedVectorStoreServiceServer() {}
+
+// UnsafeVectorStoreServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to VectorStoreServiceServer will
+// result in compilation errors.
+type UnsafeVectorStoreServiceServer interface {
+	mustEmbedUnimplementedVectorStoreServiceServer()
+}
+
+func RegisterVectorStoreServiceServer(s grpc.ServiceRegistrar, srv VectorStoreServiceServer) {
+	s.RegisterService(&VectorStoreService_ServiceDesc, srv)
+}
+
+func _VectorStoreService_GetVectorStoreByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.GetVectorStoreByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VectorStoreServiceServer).GetVectorStoreByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/llmoperator.vector_store.v1.VectorStoreService/GetVectorStoreByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VectorStoreServiceServer).GetVectorStoreByName(ctx, req.(*v1.GetVectorStoreByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// VectorStoreService_ServiceDesc is the grpc.ServiceDesc for VectorStoreService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var VectorStoreService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "llmoperator.vector_store.v1.VectorStoreService",
+	HandlerType: (*VectorStoreServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetVectorStoreByName",
+			Handler:    _VectorStoreService_GetVectorStoreByName_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api/v1/legacy/vector_store.proto",
+}
+
 // VectorStoreInternalServiceClient is the client API for VectorStoreInternalService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.

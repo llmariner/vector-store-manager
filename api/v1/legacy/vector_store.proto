@@ -7,6 +7,12 @@ import "api/v1/vector_store.proto";
 
 option go_package = "github.com/llmariner/vector-store-manager/api/v1/legacy";
 
+service VectorStoreService {
+  // Used by inference-manager-server.
+  rpc GetVectorStoreByName(llmariner.vector_store.v1.GetVectorStoreByNameRequest) returns (llmariner.vector_store.v1.VectorStore) {
+  }
+}
+
 service VectorStoreInternalService {
   rpc SearchVectorStore(llmariner.vector_store.v1.SearchVectorStoreRequest) returns (llmariner.vector_store.v1.SearchVectorStoreResponse) {
   }
