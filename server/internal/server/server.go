@@ -9,6 +9,7 @@ import (
 	fv1 "github.com/llm-operator/file-manager/api/v1"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
+	v1legacy "github.com/llmariner/vector-store-manager/api/v1/legacy"
 	"github.com/llmariner/vector-store-manager/server/internal/config"
 	"github.com/llmariner/vector-store-manager/server/internal/store"
 	"google.golang.org/grpc"
@@ -68,9 +69,15 @@ func New(
 	}
 }
 
+// legacyServer is a type alias required for embedding the same types in IS
+// nolint:unused
+type legacyServer = v1legacy.UnimplementedVectorStoreServiceServer
+
 // S is a server.
 type S struct {
 	v1.UnimplementedVectorStoreServiceServer
+	// nolint:unused
+	legacyServer
 
 	model      string
 	dimensions int
@@ -112,6 +119,7 @@ func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) err
 
 	grpcServer := grpc.NewServer(opts...)
 	v1.RegisterVectorStoreServiceServer(grpcServer, s)
+	v1legacy.RegisterVectorStoreServiceServer(grpcServer, s)
 	reflection.Register(grpcServer)
 
 	healthCheck := health.NewServer()
