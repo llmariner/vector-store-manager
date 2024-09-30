@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	fv1 "github.com/llm-operator/file-manager/api/v1"
 	"github.com/llm-operator/inference-manager/pkg/llmkind"
 	"github.com/llmariner/common/pkg/db"
+	fv1 "github.com/llmariner/file-manager/api/v1"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"github.com/llmariner/vector-store-manager/server/internal/config"
