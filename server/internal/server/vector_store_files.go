@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	fv1 "github.com/llm-operator/file-manager/api/v1"
+	fv1 "github.com/llmariner/file-manager/api/v1"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"github.com/llmariner/vector-store-manager/server/internal/store"

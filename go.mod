@@ -3,14 +3,13 @@ module github.com/llmariner/vector-store-manager
 go 1.22.2
 
 require (
-	github.com/aws/aws-sdk-go v1.51.23
 	github.com/aws/aws-sdk-go-v2 v1.31.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
-	github.com/llm-operator/file-manager v0.51.0
 	github.com/llm-operator/inference-manager v0.192.0
 	github.com/llmariner/common v0.9.0
+	github.com/llmariner/file-manager v0.68.0
 	github.com/llmariner/rbac-manager v0.101.0
 	github.com/milvus-io/milvus-sdk-go/v2 v2.4.0
 	github.com/ollama/ollama v0.1.44
@@ -66,7 +65,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
