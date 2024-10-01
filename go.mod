@@ -1,12 +1,12 @@
 module github.com/llmariner/vector-store-manager
 
-go 1.22.2
+go 1.23.1
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.31.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/llm-operator/inference-manager v0.192.0
 	github.com/llmariner/common v0.9.0
 	github.com/llmariner/file-manager v0.68.0
@@ -52,11 +52,13 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
+	github.com/gobwas/ws v1.3.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
