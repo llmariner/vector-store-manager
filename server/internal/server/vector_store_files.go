@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -35,9 +36,9 @@ func (s *S) CreateVectorStoreFile(
 	ctx context.Context,
 	req *v1.CreateVectorStoreFileRequest,
 ) (*v1.VectorStoreFile, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.VectorStoreId == "" {
@@ -166,9 +167,9 @@ func (s *S) GetVectorStoreFile(
 	ctx context.Context,
 	req *v1.GetVectorStoreFileRequest,
 ) (*v1.VectorStoreFile, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.VectorStoreId == "" {
@@ -197,9 +198,9 @@ func (s *S) ListVectorStoreFiles(
 	ctx context.Context,
 	req *v1.ListVectorStoreFilesRequest,
 ) (*v1.ListVectorStoreFilesResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.VectorStoreId == "" {
@@ -269,9 +270,9 @@ func (s *S) DeleteVectorStoreFile(
 	ctx context.Context,
 	req *v1.DeleteVectorStoreFileRequest,
 ) (*v1.DeleteVectorStoreFileResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.VectorStoreId == "" {

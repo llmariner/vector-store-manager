@@ -9,6 +9,7 @@ import (
 	"github.com/go-logr/stdr"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/llm-operator/inference-manager/pkg/llmkind"
+	"github.com/llmariner/api-usage/pkg/sender"
 	"github.com/llmariner/common/pkg/db"
 	fv1 "github.com/llmariner/file-manager/api/v1"
 	"github.com/llmariner/rbac-manager/pkg/auth"
@@ -136,6 +137,12 @@ func run(ctx context.Context, c *config.Config) error {
 
 	s := server.New(st, fclient, fwClient, vstoreClient, e, c.Model, dim, logger)
 
+	usage, err := sender.New(ctx, c.UsageSender, grpc.WithTransportCredentials(insecure.NewCredentials()), logger)
+	if err != nil {
+		return err
+	}
+	go func() { usage.Run(ctx) }()
+
 	errCh := make(chan error)
 	go func() {
 		log.Info("Starting HTTP server...", "port", c.HTTPPort)
@@ -143,7 +150,7 @@ func run(ctx context.Context, c *config.Config) error {
 	}()
 
 	go func() {
-		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig)
+		errCh <- s.Run(ctx, c.GRPCPort, c.AuthConfig, usage)
 	}()
 
 	go func() {

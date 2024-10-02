@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/llm-operator/inference-manager/pkg/llmkind"
+	"github.com/llmariner/api-usage/pkg/sender"
 	"github.com/llmariner/common/pkg/db"
 	"gopkg.in/yaml.v3"
 )
@@ -87,7 +88,8 @@ type Config struct {
 	// Model is the embedding model name.
 	Model string `yaml:"model"`
 
-	AuthConfig AuthConfig `yaml:"auth"`
+	AuthConfig  AuthConfig    `yaml:"auth"`
+	UsageSender sender.Config `yaml:"usageSender"`
 }
 
 // Validate validates the configuration.
@@ -123,6 +125,9 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("object store: %s", err)
 	}
 	if err := c.AuthConfig.Validate(); err != nil {
+		return err
+	}
+	if err := c.UsageSender.Validate(); err != nil {
 		return err
 	}
 	switch c.LLMEngine {

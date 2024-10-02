@@ -79,7 +79,7 @@ func TestCreateVectorStore(t *testing.T) {
 				dimensions,
 				testr.New(t),
 			)
-			ctx := context.Background()
+			ctx := fakeAuthInto(context.Background())
 			resp, err := srv.CreateVectorStore(ctx, tc.req)
 			if tc.wantErr {
 				assert.Error(t, err)
@@ -125,7 +125,7 @@ func TestListVectorStores(t *testing.T) {
 		testr.New(t),
 	)
 
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 	var vss []*v1.VectorStore
 	for _, name := range names {
 		vs, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
@@ -188,7 +188,7 @@ func TestListVectorStores(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := fakeAuthInto(context.Background())
 			respList, err := srv.ListVectorStores(ctx, tc.req)
 			assert.NoError(t, err)
 			assert.Len(t, respList.Data, len(tc.resp.Data))
@@ -222,7 +222,7 @@ func TestGetVectorStore(t *testing.T) {
 		"vector_store_1",
 		"vector_store_2",
 	}
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 	var vss []*v1.VectorStore
 	for _, name := range names {
 		vs, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
@@ -294,7 +294,7 @@ func TestGetVectorStoreByName(t *testing.T) {
 		"vector_store_1",
 		"vector_store_2",
 	}
-	ctx := context.Background()
+	ctx := fakeAuthInto(context.Background())
 	var vss []*v1.VectorStore
 	for _, name := range names {
 		vs, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
@@ -407,7 +407,7 @@ func TestDeleteVectorStore(t *testing.T) {
 				dimensions,
 				testr.New(t),
 			)
-			ctx := context.Background()
+			ctx := fakeAuthInto(context.Background())
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
 				Name: vectorStoreName,
 			})
@@ -497,7 +497,7 @@ func TestUpdateVectorStore(t *testing.T) {
 				dimensions,
 				testr.New(t),
 			)
-			ctx := context.Background()
+			ctx := fakeAuthInto(context.Background())
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
 				Name: vectorStoreName,
 			})

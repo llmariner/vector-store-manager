@@ -29,9 +29,9 @@ func (s *S) CreateVectorStore(
 	ctx context.Context,
 	req *v1.CreateVectorStoreRequest,
 ) (*v1.VectorStore, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Name == "" {
@@ -193,9 +193,9 @@ func (s *S) ListVectorStores(
 	ctx context.Context,
 	req *v1.ListVectorStoresRequest,
 ) (*v1.ListVectorStoresResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Limit < 0 {
@@ -261,9 +261,9 @@ func (s *S) GetVectorStore(
 	ctx context.Context,
 	req *v1.GetVectorStoreRequest,
 ) (*v1.VectorStore, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Id == "" {
@@ -291,9 +291,9 @@ func (s *S) GetVectorStoreByName(
 	ctx context.Context,
 	req *v1.GetVectorStoreByNameRequest,
 ) (*v1.VectorStore, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Name == "" {
@@ -321,9 +321,9 @@ func (s *S) UpdateVectorStore(
 	ctx context.Context,
 	req *v1.UpdateVectorStoreRequest,
 ) (*v1.VectorStore, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Id == "" {
@@ -417,9 +417,9 @@ func (s *S) DeleteVectorStore(
 	ctx context.Context,
 	req *v1.DeleteVectorStoreRequest,
 ) (*v1.DeleteVectorStoreResponse, error) {
-	userInfo, err := s.extractUserInfoFromContext(ctx)
-	if err != nil {
-		return nil, err
+	userInfo, ok := auth.ExtractUserInfoFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to extract user info from context")
 	}
 
 	if req.Id == "" {
