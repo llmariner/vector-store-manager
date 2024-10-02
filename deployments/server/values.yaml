@@ -35,6 +35,9 @@ global:
     enable:
     rbacInternalServerAddr:
 
+  usageSender:
+    apiUsageInternalServerAddr:
+
 httpPort: 8080
 grpcPort: 8081
 internalGrpcPort: 8083

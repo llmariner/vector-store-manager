@@ -98,7 +98,7 @@ func TestCreateVectorStoreFile(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
-			resp, err := srv.CreateVectorStoreFile(context.Background(), tc.req)
+			resp, err := srv.CreateVectorStoreFile(fakeAuthInto(context.Background()), tc.req)
 			if tc.wantErr {
 				assert.Error(t, err)
 				return
@@ -154,10 +154,11 @@ func TestCreateVectorStoreFile_AlreadyExists(t *testing.T) {
 		FileId:        fileID,
 		VectorStoreId: vectorStoreID,
 	}
-	_, err = srv.CreateVectorStoreFile(context.Background(), req)
+	ctx := fakeAuthInto(context.Background())
+	_, err = srv.CreateVectorStoreFile(ctx, req)
 	assert.NoError(t, err)
 
-	_, err = srv.CreateVectorStoreFile(context.Background(), req)
+	_, err = srv.CreateVectorStoreFile(ctx, req)
 	assert.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Code(err))
 }
@@ -265,7 +266,7 @@ func TestListVectorStoreFiles(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
-			ctx := context.Background()
+			ctx := fakeAuthInto(context.Background())
 			for _, f := range fs {
 				resp, err := srv.CreateVectorStoreFile(ctx, &v1.CreateVectorStoreFileRequest{
 					FileId:        f,
@@ -369,7 +370,7 @@ func TestGetVectorStoreFile(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
-			ctx := context.Background()
+			ctx := fakeAuthInto(context.Background())
 			resp, err := srv.CreateVectorStoreFile(ctx, &v1.CreateVectorStoreFileRequest{
 				FileId:        fileID,
 				VectorStoreId: vectorStoreID,
@@ -458,7 +459,7 @@ func TestDeleteVectorStoreFile(t *testing.T) {
 				ProjectID:     "default",
 			})
 			assert.NoError(t, err)
-			ctx := context.Background()
+			ctx := fakeAuthInto(context.Background())
 			resp, err := srv.CreateVectorStoreFile(ctx, &v1.CreateVectorStoreFileRequest{
 				FileId:        fileID,
 				VectorStoreId: vectorStoreID,

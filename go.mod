@@ -6,24 +6,25 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.31.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3
-	github.com/go-logr/logr v1.4.1
+	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/stdr v1.2.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/llm-operator/inference-manager v0.192.0
+	github.com/llmariner/api-usage v0.8.0
 	github.com/llmariner/common v0.9.0
 	github.com/llmariner/file-manager v0.68.0
-	github.com/llmariner/rbac-manager v0.101.0
+	github.com/llmariner/rbac-manager v0.110.0
 	github.com/milvus-io/milvus-sdk-go/v2 v2.4.0
 	github.com/ollama/ollama v0.1.44
 	github.com/sashabaranov/go-openai v1.27.0
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/tmc/langchaingo v0.1.11
-	google.golang.org/genproto/googleapis/api v0.0.0-20240506185236-b8a5c65736ae
-	google.golang.org/grpc v1.64.1
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142
+	google.golang.org/grpc v1.67.0
+	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/gorm v1.25.9
+	gorm.io/gorm v1.25.12
 )
 
 require (
@@ -89,13 +90,13 @@ require (
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a // indirect
 	gitlab.com/golang-commonmark/mdurl v0.0.0-20191124015652-932350d1cb84 // indirect
 	gitlab.com/golang-commonmark/puny v0.0.0-20191124015043-9f83538fa04f // indirect
-	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240506185236-b8a5c65736ae // indirect
+	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
 	gorm.io/driver/postgres v1.5.7 // indirect
 	gorm.io/driver/sqlite v1.5.5 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
