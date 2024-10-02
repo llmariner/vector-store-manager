@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"github.com/llmariner/vector-store-manager/server/internal/store"
 	"github.com/stretchr/testify/assert"
@@ -87,6 +88,7 @@ func TestCreateVectorStoreFile(t *testing.T) {
 				},
 				modelName,
 				dimensions,
+				testr.New(t),
 			)
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,
@@ -137,6 +139,7 @@ func TestCreateVectorStoreFile_AlreadyExists(t *testing.T) {
 		},
 		modelName,
 		dimensions,
+		testr.New(t),
 	)
 	err := st.CreateCollection(&store.Collection{
 		CollectionID:  collectionID,
@@ -252,6 +255,7 @@ func TestListVectorStoreFiles(t *testing.T) {
 				},
 				modelName,
 				dimensions,
+				testr.New(t),
 			)
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,
@@ -355,6 +359,7 @@ func TestGetVectorStoreFile(t *testing.T) {
 				},
 				modelName,
 				dimensions,
+				testr.New(t),
 			)
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,
@@ -443,6 +448,7 @@ func TestDeleteVectorStoreFile(t *testing.T) {
 				},
 				modelName,
 				dimensions,
+				testr.New(t),
 			)
 			err := st.CreateCollection(&store.Collection{
 				CollectionID:  collectionID,

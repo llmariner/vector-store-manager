@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/go-logr/logr"
 	"github.com/tmc/langchaingo/documentloaders"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
@@ -39,6 +39,7 @@ type E struct {
 	llmClient    LLMClient
 	s3Client     s3Client
 	vstoreClient vstoreClient
+	log          logr.Logger
 }
 
 // New creates a new Embedder.
@@ -46,11 +47,13 @@ func New(
 	llmClient LLMClient,
 	s3Client s3Client,
 	vstoreClient vstoreClient,
+	log logr.Logger,
 ) *E {
 	return &E{
 		llmClient:    llmClient,
 		s3Client:     s3Client,
 		vstoreClient: vstoreClient,
+		log:          log.WithName("embed"),
 	}
 }
 
@@ -65,30 +68,32 @@ func (e *E) AddFile(
 	chunkSizeTokens,
 	chunkOverlapTokens int64,
 ) error {
-	log.Printf("Downloading file from %q\n", filePath)
+	e.log.Info("Downloading file", "from", filePath)
 	f, err := os.CreateTemp("/tmp", "rag-file-")
 	if err != nil {
 		return err
 	}
+
+	log := e.log.WithValues("file", f.Name())
 	defer func() {
 		if err := os.Remove(f.Name()); err != nil {
-			log.Printf("Failed to remove %q: %s", f.Name(), err)
+			e.log.Error(err, "Failed to remove")
 		}
 	}()
 
 	if err := e.s3Client.Download(ctx, f, filePath); err != nil {
 		return fmt.Errorf("download: %s", err)
 	}
-	log.Printf("Downloaded file to %q\n", f.Name())
+	log.Info("Downloaded file")
 	if err := f.Close(); err != nil {
 		return err
 	}
 
-	docs, err := splitFile(ctx, f.Name(), filepath.Ext(fileName), chunkSizeTokens, chunkSizeTokens)
+	docs, err := splitFile(logr.NewContext(ctx, log), f.Name(), filepath.Ext(fileName), chunkSizeTokens, chunkSizeTokens)
 	if err != nil {
 		return fmt.Errorf("split file: %s", err)
 	}
-	log.Printf("Splitted file into %d chunks\n", len(docs))
+	log.Info("Splitted file into chunks", "count", len(docs))
 
 	if err := e.llmClient.PullModel(ctx, modelName); err != nil {
 		return fmt.Errorf("pull model: %s", err)
@@ -110,7 +115,7 @@ func (e *E) AddFile(
 }
 
 func splitFile(ctx context.Context, fileName, fileType string, chunkSizeTokens, chunkOverlapTokens int64) ([]schema.Document, error) {
-	log.Printf("Spliting file %q into chunks\n", fileName)
+	logr.FromContextOrDiscard(ctx).Info("Splitting file into chunks")
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -160,6 +165,6 @@ func (e *E) Search(ctx context.Context, collectionName, modelName, query string,
 	if err != nil {
 		return nil, fmt.Errorf("vector search: %s", err)
 	}
-	log.Printf("search result(%s): %+v\n", query, results)
+	e.log.Info("search result", "query", query, "results", results)
 	return results, nil
 }

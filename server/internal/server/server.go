@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 
+	"github.com/go-logr/logr"
 	fv1 "github.com/llmariner/file-manager/api/v1"
 	"github.com/llmariner/rbac-manager/pkg/auth"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
@@ -56,6 +56,7 @@ func New(
 	e embedder,
 	model string,
 	dimensions int,
+	log logr.Logger,
 ) *S {
 	return &S{
 		store:              store,
@@ -65,6 +66,7 @@ func New(
 		embedder:           e,
 		model:              model,
 		dimensions:         dimensions,
+		log:                log.WithName("grpc"),
 	}
 }
 
@@ -81,13 +83,14 @@ type S struct {
 	vstoreClient       vstoreClient
 	store              *store.S
 	srv                *grpc.Server
+	log                logr.Logger
 
 	enableAuth bool
 }
 
 // Run starts the gRPC server.
 func (s *S) Run(ctx context.Context, port int, authConfig config.AuthConfig) error {
-	log.Printf("Starting server on port %d\n", port)
+	s.log.Info("Starting gRPC server...", "port", port)
 
 	var opts []grpc.ServerOption
 	if authConfig.Enable {

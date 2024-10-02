@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	fv1 "github.com/llmariner/file-manager/api/v1"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"github.com/llmariner/vector-store-manager/server/internal/store"
@@ -76,6 +77,7 @@ func TestCreateVectorStore(t *testing.T) {
 				&noopEmbedder{},
 				modelName,
 				dimensions,
+				testr.New(t),
 			)
 			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, tc.req)
@@ -120,6 +122,7 @@ func TestListVectorStores(t *testing.T) {
 		&noopEmbedder{},
 		modelName,
 		dimensions,
+		testr.New(t),
 	)
 
 	ctx := context.Background()
@@ -212,6 +215,7 @@ func TestGetVectorStore(t *testing.T) {
 		&noopEmbedder{},
 		modelName,
 		dimensions,
+		testr.New(t),
 	)
 
 	names := []string{
@@ -283,6 +287,7 @@ func TestGetVectorStoreByName(t *testing.T) {
 		&noopEmbedder{},
 		modelName,
 		dimensions,
+		testr.New(t),
 	)
 
 	names := []string{
@@ -400,6 +405,7 @@ func TestDeleteVectorStore(t *testing.T) {
 				&noopEmbedder{},
 				modelName,
 				dimensions,
+				testr.New(t),
 			)
 			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{
@@ -489,6 +495,7 @@ func TestUpdateVectorStore(t *testing.T) {
 				&noopEmbedder{},
 				modelName,
 				dimensions,
+				testr.New(t),
 			)
 			ctx := context.Background()
 			resp, err := srv.CreateVectorStore(ctx, &v1.CreateVectorStoreRequest{

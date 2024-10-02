@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"log"
 	"strings"
 	"time"
 
@@ -92,7 +91,8 @@ func (s *S) createVectorStoreFile(ctx context.Context, c *store.Collection, f *f
 		return nil, status.Errorf(codes.Internal, "get file path: %s", err)
 	}
 
-	log.Printf("Adding file %q to vector store %q.\n", f.Id, c.VectorStoreID)
+	log := s.log.WithValues("file", f.Id, "store", c.VectorStoreID)
+	log.Info("Adding file to vector store")
 	if err := s.embedder.AddFile(
 		ctx,
 		c.VectorStoreID,
@@ -117,7 +117,7 @@ func (s *S) createVectorStoreFile(ctx context.Context, c *store.Collection, f *f
 	if err := s.store.CreateFile(file); err != nil {
 		return nil, status.Errorf(codes.Internal, "create file: %s", err)
 	}
-	log.Printf("Added file %q to vector store %q", file.FileID, file.VectorStoreID)
+	log.Info("Added file to vector store")
 	return file, nil
 }
 

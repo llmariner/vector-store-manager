@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 
+	"github.com/go-logr/logr"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -16,10 +16,11 @@ type retriever interface {
 }
 
 // NewInternal creates an internal server.
-func NewInternal(model string, r retriever) *IS {
+func NewInternal(model string, r retriever, log logr.Logger) *IS {
 	return &IS{
 		model:     model,
 		retriever: r,
+		log:       log.WithName("internal"),
 	}
 }
 
@@ -30,11 +31,12 @@ type IS struct {
 	model     string
 	retriever retriever
 	srv       *grpc.Server
+	log       logr.Logger
 }
 
 // Run starts the internal gRPC server.
 func (s *IS) Run(port int) error {
-	log.Printf("Starting internal server on port %d\n", port)
+	s.log.Info("Starting internal server...", "port", port)
 
 	grpcServer := grpc.NewServer()
 	v1.RegisterVectorStoreInternalServiceServer(grpcServer, s)
