@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -129,7 +128,7 @@ func (s *S) CreateVectorStore(
 	var errMsgs []string
 	for _, f := range fs {
 		if _, err := s.createVectorStoreFile(ctx, c, f, cs); err != nil {
-			log.Printf("Failed to add file %q to vector store %q: %s", f.Id, c.VectorStoreID, err)
+			s.log.Error(err, "Failed to add file to vector store", "file", f.Id, "store", c.VectorStoreID)
 			errMsgs = append(errMsgs, fmt.Sprintf("file %q: %s", f.Id, err))
 			continue
 		}

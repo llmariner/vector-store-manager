@@ -6,6 +6,7 @@ import (
 	"io"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/stretchr/testify/assert"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -54,6 +55,7 @@ func TestAddSearchDeleteFile(t *testing.T) {
 						2: {"line2"},
 					},
 				},
+				testr.New(t),
 			)
 			ctx := context.Background()
 			err := e.AddFile(ctx, collectionName0, modelName, fileID, tc.fileName, tc.path, chunkSizeTokens, chunkOverlapTokens)

@@ -6,6 +6,8 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.31.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3
+	github.com/go-logr/logr v1.4.1
+	github.com/go-logr/stdr v1.2.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/llm-operator/inference-manager v0.192.0
 	github.com/llmariner/common v0.9.0

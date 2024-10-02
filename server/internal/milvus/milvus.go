@@ -3,10 +3,10 @@ package milvus
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
+	"github.com/go-logr/logr"
 	"github.com/llmariner/common/pkg/db"
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
@@ -27,12 +27,15 @@ const (
 // S wraps Milvus client.
 type S struct {
 	client client.Client
+	log    logr.Logger
 }
 
 // New creates an active client connection to the Milvus server.
-func New(ctx context.Context, cfg db.Config) (*S, error) {
+func New(ctx context.Context, cfg db.Config, log logr.Logger) (*S, error) {
+	log = log.WithName("milvus")
+
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	log.Printf("Connecting to Milvus: %s\n", addr)
+	log.Info("Connecting to Milvus", "address", addr)
 	passwd := os.Getenv(cfg.PasswordEnvName)
 	config := client.Config{
 		Address:  addr,
@@ -44,9 +47,11 @@ func New(ctx context.Context, cfg db.Config) (*S, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Connected to Milvus\n")
+	log.Info("Connected to Milvus")
+
 	return &S{
 		client: c,
+		log:    log,
 	}, nil
 }
 
@@ -105,7 +110,7 @@ func (s *S) CreateVectorStore(ctx context.Context, name string, dimensions int) 
 	if err != nil {
 		return 0, err
 	}
-	log.Printf("Created collection: %+v\n", c)
+	s.log.Info("Created collection", "collection", c)
 
 	return c.ID, nil
 }
@@ -151,7 +156,7 @@ func (s *S) DeleteDocuments(ctx context.Context, collectionName, fileID string) 
 	}
 	defer func() {
 		if err := s.client.ReleaseCollection(ctx, collectionName); err != nil {
-			log.Printf("Failed to release collection: %s\n", err)
+			s.log.Error(err, "Failed to release collection")
 		}
 	}()
 
@@ -166,7 +171,7 @@ func (s *S) Search(ctx context.Context, collectionName string, vectors []float32
 	}
 	defer func() {
 		if err := s.client.ReleaseCollection(ctx, collectionName); err != nil {
-			log.Printf("Failed to release collection: %s\n", err)
+			s.log.Error(err, "Failed to release collection")
 		}
 	}()
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	v1 "github.com/llmariner/vector-store-manager/api/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -54,6 +55,7 @@ func TestSearchVectorStore(t *testing.T) {
 						"hi": []string{"hello", "hi"},
 					},
 				},
+				testr.New(t),
 			)
 			ctx := context.Background()
 			resp, err := srv.SearchVectorStore(ctx, tc.req)
