@@ -21,7 +21,7 @@ jobs:
         default_bump: minor
         dry_run: true
     - name: Update versions
-      run: ./hack/update-chart-versions.sh ${{ steps.tag_version.outputs.new_version }}
+      run: ./hack/update-chart-version.sh ${{ steps.tag_version.outputs.new_version }}
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
