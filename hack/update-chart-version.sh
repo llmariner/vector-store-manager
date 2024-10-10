@@ -1,4 +1,6 @@
-#!/bin/bash -eu -o pipefail
+#!/usr/bin/env bash
+
+set -eu -o pipefail
 
 ver=$1
 name=server

@@ -13,6 +13,8 @@ permissions:
 jobs:
 
   re-test:
+    outputs:
+      release_commit: ${{ startsWith(github.event.head_commit.message, 'Release v') }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -23,19 +25,9 @@ jobs:
     - name: Re-test
       run: make test
 
-  check-release:
-    runs-on: ubuntu-latest
-    outputs:
-      release_commit: ${{ steps.check.outputs.release_commit }}
-    steps:
-    - id: check
-      run: echo "release_commit=${{ startsWith(github.event.head_commit.message, 'Release v') }}" >> "$GITHUB_OUTPUT"
-
   publish-latest-image-only:
-    if: needs.check-release.outputs.release_commit == 'false'
-    needs:
-    - re-test
-    - check-release
+    if: needs.re-test.outputs.release_commit == 'false'
+    needs: re-test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -61,18 +53,17 @@ jobs:
           public.ecr.aws/cloudnatix/llmariner/vector-store-manager-server:latest
 
   release-image-and-chart:
-    if: needs.check-release.outputs.release_commit == 'true'
-    needs:
-    - re-test
-    - check-release
+    if: needs.re-test.outputs.release_commit == 'true'
+    needs: re-test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Extract version
       run: |
-        echo "This is a release commit: ${{ needs.check-release.outputs.release_commit }}"
-        ver=$(echo '${{ github.event.head_commit.message }}'| head -n1 | awk '{print $2}' |sed 's/v//')
+        ver=$(echo "$COMMIT_MESSAGE"| head -n1 | awk '{print $2}' |sed 's/v//')
         echo "version=${ver}" >> $GITHUB_ENV
+      env:
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
