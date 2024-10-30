@@ -1,86 +1,255 @@
-global:
-  database:
-    host:
-    port:
-    username:
-    ssl:
-      mode:
-      rootCert:
-    createDatabase:
-    originalDatabase:
+# Default values for vector-store-manager-server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
 
+# +docs:section=Global
+
+# Global settings are used to share the values among LLMariner components.
+# vector-store-manager-server is a dependency of LLMariner, so global
+# values are propagated at its installation.
+# Please see https://github.com/llmariner/llmariner/blob/main/deployments/llmariner.
+global:
+  # Specify SQL database info for the server access.
+  # Currently, only PostgreSQL is supported.
+  database:
+    # The database host name.
+    host: postgres
+    # The database port number.
+    port: 5432
+    # The database user name.
+    username: ps_user
+
+    ssl:
+      # This option determines whether or with what priority a secure
+      # SSL TCP/IP connection will be negotiated with the database.
+      # For more information, see [Database Connection Control](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNECT-SSLMODE)
+      mode: prefer
+      # Specify the name of a file containing SSL certificate authority (CA)
+      # certificate(s). If the file exists, the server's certificate will
+      # be verified to be signed by one of these authorities.
+      # For more information, see [Database Connection Control](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNECT-SSLROOTCERT)
+      # +docs:property
+      # rootCert: ""
+
+    # Specify whether to create the database if it does not exist.
+    createDatabase: true
+    # Specify the original database name to connect to before creating
+    # the database. If empty, use "template1".
+    # +docs:property
+    # originalDatabase: ""
+
+  # Specify the Secret that contains a database password. The Deployment
+  # reads this secret and sets it as a environment value.
   databaseSecret:
-    name:
-    key:
+    # The secret name.
+    name: postgres
+    # The key name with a password set.
+    key: password
+
+  # Specify object store info to manage data.
+  # Currently, only object stores with S3-compatible APIs are supported.
   objectStore:
     s3:
-      endpointUrl:
-      region:
-      bucket:
-      assumeRole:
-        roleArn:
-        externalId:
-  awsSecret:
-    name:
-    accessKeyIdKey:
-    secretAccessKeyKey:
-  ingress:
-    ingressClassName:
-    annotations:
-    tls:
-      hosts:
-      secretName:
+      # The endpoint URL for the object store.
+      endpointUrl: http://minio:9000
+      # The region name.
+      region: dummy
+      # The bucket name to store data.
+      bucket: llmariner
 
+      # Optional AssumeRole.
+      # For more information, see [AssumeRole](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html).
+      # +docs:property
+      # assumeRole:
+      #   roleArn: ""
+      #   externalId: ""
+
+  # Optional Secret configration for the object store. If specified,
+  # the Secret is loaded as environment variables into the container.
+  awsSecret:
+    # The secret name.
+    # +docs:property
+    # name: ""
+
+    # The key name with an access key ID set.
+    accessKeyIdKey: accessKeyId
+    # The key name with a secret access key set.
+    secretAccessKeyKey: secretAccessKey
+
+  # Manages the authentication and RBAC settings for the endpoints of
+  # the public and worker service APIs.
   auth:
-    enable:
-    rbacInternalServerAddr:
+    # The flag to enable auth.
+    enable: true
+    # The address of the rbac-server to use API auth.
+    rbacInternalServerAddr: rbac-server-internal-grpc:8082
+
+  ingress:
+    # The Ingress class name.
+    ingressClassName: kong
+
+    # Optional additional annotations to add to the Ingress.
+    # +docs:property
+    # annotations: {}
+
+    # If specified, the API accessed via Ingress will be enabled for TLS.
+    # For more information, see [Enable TLS](https://llmariner.ai/docs/setup/install/single_cluster_production/#optional-enable-tls).
+    #
+    # For example:
+    # tls:
+    #   hosts:
+    #   - api.llm.mydomain.com
+    #   secretName: api-tls
+    # 
+    # +docs:property
+    # tls:
+    #   hosts: []
+    #   secretName: ""
 
   usageSender:
-    apiUsageInternalServerAddr:
+    # The address of the api-usage-server to send API usage data.
+    apiUsageInternalServerAddr: api-usage-server-internal-grpc:8082
 
-httpPort: 8080
-grpcPort: 8081
-internalGrpcPort: 8083
-
-# The following default values work if the services run in the same namespace.
-fileManagerServerAddr: file-manager-server-grpc:8081
-fileManagerServerInternalAddr: file-manager-server-internal-grpc:8083
-llmEngineAddr: inference-manager-engine-llm:8080
-llmEngine: ollama
-
-model: all-minilm
-
-replicaCount: 1
-
-serviceAccount:
-  create: true
-
-image:
-  repository: public.ecr.aws/cloudnatix/llmariner/vector-store-manager-server
-  pullPolicy: IfNotPresent
-
-podAnnotations:
-nodeSelector:
-affinity:
-tolerations:
-
-version:
+# +docs:section=Server
 
 database:
+  # The database name for storing the vector-store-manager-server data.
   database: vector_store_manager
 
+# Specify vector-database info for the server access.
+# Currently, only Milvus is supported.
 vectorDatabase:
+  # The vector-database host name.
   host: milvus.milvus
+  # The vector-database port number.
   port: 19530
+  # The vector-database user name.
   username: root
+  # The vector-database name for storing data.
   database: default
-  ssl:
-    mode: disable
 
+  ssl:
+    # This option determines whether or with what priority a secure
+    # SSL TCP/IP connection will be negotiated with the database.
+    mode: disable
+    # Specify the name of a file containing SSL CA certificate.
+    # +docs:property
+    # rootCert: ""
+
+# Specify the Secret that contains a vector-database password.
+# The Deployment reads this secret and sets it as a environment value.
 vectorDatabaseSecret:
+  # The secret name.
   name: vector-store
+  # The key name with a password set.
   key: password
 
+# The HTTP port number for the public service.
+httpPort: 8080
+# The GRPC port number for the public service.
+grpcPort: 8081
+# The GRPC port number for the internal service.
+internalGrpcPort: 8083
+
+# The public address of the file-manager-server to get file.
+# The default value works if the services run in the same namespace.
+fileManagerServerAddr: file-manager-server-grpc:8081
+# The internal address of the file-manager-server to refere file.
+fileManagerServerInternalAddr: file-manager-server-internal-grpc:8083
+
+# The internal address of the file-manager-server to manage file.
+llmEngineAddr: inference-manager-engine-llm:8080
+# The name of LLM engine.
+# +docs:enum=ollama,vllm
+llmEngine: ollama
+# The name of LLM model.
+model: all-minilm
+
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  # +docs:property
+  # name: ""
+
+# Override the "vector-store-manager-server.fullname" value. This value
+# is used as part of most of the names of the resources created by this
+# Helm chart.
+# +docs:property
+# fullnameOverride: "my-vector-store-manager-server"
+
+# Override the "vector-store-manager-server.name" value, which is used
+# to annotate some of the resources that are created by this Chart
+# (using "app.kubernetes.io/name").
+# +docs:property
+# nameOverride: "my-vector-store-manager-server"
+
+# The number of replicas for the vector-store-manager-server Deployment.
+replicaCount: 1
+
+# The container image of vector-store-manager-server.
+image:
+  # The container image name.
+  repository: public.ecr.aws/cloudnatix/llmariner/vector-store-manager-server
+  # Kubernetes imagePullPolicy on Deployment.
+  pullPolicy: IfNotPresent
+
+# Override the container image tag to deploy by setting this variable.
+# If no value is set, the chart's appVersion will be used.
+# +docs:property
+# version: vX.Y.Z
+
+# Optional additional annotations to add to the Deployment Pods.
+# +docs:property
+# podAnnotations: {}
+
+# The nodeSelector on Pods tells Kubernetes to schedule Pods on the
+# nodes with matching labels.
+# For more information, see [Assigning Pods to Nodes](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/).
+# +docs:property
+# nodeSelector: {}
+
+# A Kubernetes Affinity, if required.
+# For more information, see [Assigning Pods to Nodes](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node).
+#
+# For example:
+#   affinity:
+#     nodeAffinity:
+#      requiredDuringSchedulingIgnoredDuringExecution:
+#        nodeSelectorTerms:
+#        - matchExpressions:
+#          - key: foo.bar.com/role
+#            operator: In
+#            values:
+#            - master
+#
+# +docs:property
+# affinity: {}
+
+# A list of Kubernetes Tolerations, if required.
+# For more information, see [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/).
+#
+# For example:
+#   tolerations:
+#   - key: foo.bar.com/role
+#     operator: Equal
+#     value: master
+#     effect: NoSchedule
+#
+# +docs:property
+# tolerations: []
+
+# Resources to provide to the vector-store-manager-server pod.
+# For more information, see [Resource Management for Pods and Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-Containers/).
+#
+# For example:
+#  requests:
+#    cpu: 10m
+#    memory: 32Mi
+#
+# +docs:property
 resources:
   requests:
     cpu: "250m"
@@ -88,17 +257,25 @@ resources:
   limits:
     cpu: "250m"
 
+# LivenessProbe settings for the vector-store-manager-server pod.
+# For more information, see [Liveness, Readiness, and Startup Probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)
 livenessProbe:
-  httpGet:
-    path: /healthz
-    port: http
-    scheme: HTTP
+  enabled: true
   initialDelaySeconds: 3
-  failureThreshold: 5
+  periodSeconds: 10
   timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 5
 
+# Security Context for the vector-store-manager-server pod.
+# For more information, see [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/).
+# +docs:property
 podSecurityContext:
   fsGroup: 2000
+
+# Security Context for the vector-store-manager-server container.
+# For more information, see [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/).
+# +docs:property
 securityContext:
   readOnlyRootFilesystem: true
   capabilities:
@@ -106,3 +283,11 @@ securityContext:
     - ALL
   runAsNonRoot: true
   runAsUser: 1000
+
+# Additional volumes to add to the vector-store-manager-server pod.
+# +docs:property
+# volumes: []
+
+# Additional volume mounts to add to the vector-store-manager-server container.
+# +docs:property
+# volumeMounts: []
