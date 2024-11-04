@@ -15,6 +15,7 @@ global:
     # The database host name.
     host: postgres
     # The database port number.
+    # +docs:type=number
     port: 5432
     # The database user name.
     username: ps_user
@@ -100,7 +101,7 @@ global:
     #   hosts:
     #   - api.llm.mydomain.com
     #   secretName: api-tls
-    # 
+    #
     # +docs:property
     # tls:
     #   hosts: []
@@ -122,6 +123,7 @@ vectorDatabase:
   # The vector-database host name.
   host: milvus.milvus
   # The vector-database port number.
+  # +docs:type=number
   port: 19530
   # The vector-database user name.
   username: root
@@ -145,10 +147,13 @@ vectorDatabaseSecret:
   key: password
 
 # The HTTP port number for the public service.
+# +docs:type=number
 httpPort: 8080
 # The GRPC port number for the public service.
+# +docs:type=number
 grpcPort: 8081
 # The GRPC port number for the internal service.
+# +docs:type=number
 internalGrpcPort: 8083
 
 # The public address of the file-manager-server to get file.
@@ -187,6 +192,7 @@ serviceAccount:
 # nameOverride: "my-vector-store-manager-server"
 
 # The number of replicas for the vector-store-manager-server Deployment.
+# +docs:type=number
 replicaCount: 1
 
 # The container image of vector-store-manager-server.
@@ -260,11 +266,26 @@ resources:
 # LivenessProbe settings for the vector-store-manager-server pod.
 # For more information, see [Liveness, Readiness, and Startup Probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)
 livenessProbe:
+  # Specify whether to enable the liveness probe.
   enabled: true
+  # Number of seconds after the container has started before startup,
+  # liveness or readiness probes are initiated.
+  # +docs:type=number
   initialDelaySeconds: 3
+  # How often (in seconds) to perform the probe. Default to 10 seconds. 
+  # +docs:type=number
   periodSeconds: 10
+  # Number of seconds after which the probe times out. 
+  # +docs:type=number
   timeoutSeconds: 3
+  # Minimum consecutive successes for the probe to be considered
+  # successful after having failed.
+  # +docs:type=number
   successThreshold: 1
+  # After a probe fails `failureThreshold` times in a row, Kubernetes
+  # considers that the overall check has failed: the container is not
+  # ready/healthy/live. 
+  # +docs:type=number
   failureThreshold: 5
 
 # Security Context for the vector-store-manager-server pod.
