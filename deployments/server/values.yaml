@@ -51,12 +51,14 @@ global:
   # Currently, only object stores with S3-compatible APIs are supported.
   objectStore:
     s3:
-      # The endpoint URL for the object store.
-      endpointUrl: http://minio:9000
       # The region name.
       region: dummy
       # The bucket name to store data.
       bucket: llmariner
+
+      # Optional endpoint URL for the object store.
+      # +docs:property
+      # endpointUrl: ""
 
       # Optional AssumeRole.
       # For more information, see [AssumeRole](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html).
@@ -272,10 +274,10 @@ livenessProbe:
   # liveness or readiness probes are initiated.
   # +docs:type=number
   initialDelaySeconds: 3
-  # How often (in seconds) to perform the probe. Default to 10 seconds. 
+  # How often (in seconds) to perform the probe. Default to 10 seconds.
   # +docs:type=number
   periodSeconds: 10
-  # Number of seconds after which the probe times out. 
+  # Number of seconds after which the probe times out.
   # +docs:type=number
   timeoutSeconds: 3
   # Minimum consecutive successes for the probe to be considered
@@ -284,7 +286,7 @@ livenessProbe:
   successThreshold: 1
   # After a probe fails `failureThreshold` times in a row, Kubernetes
   # considers that the overall check has failed: the container is not
-  # ready/healthy/live. 
+  # ready/healthy/live.
   # +docs:type=number
   failureThreshold: 5
 
