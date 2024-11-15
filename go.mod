@@ -10,10 +10,10 @@ require (
 	github.com/go-logr/stdr v1.2.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/llm-operator/inference-manager v0.192.0
-	github.com/llmariner/api-usage v0.8.0
+	github.com/llmariner/api-usage v1.2.0
 	github.com/llmariner/common v0.9.0
 	github.com/llmariner/file-manager v0.68.0
-	github.com/llmariner/rbac-manager v0.110.0
+	github.com/llmariner/rbac-manager v0.112.0
 	github.com/milvus-io/milvus-sdk-go/v2 v2.4.0
 	github.com/ollama/ollama v0.1.44
 	github.com/sashabaranov/go-openai v1.27.0
