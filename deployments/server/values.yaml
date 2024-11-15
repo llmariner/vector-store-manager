@@ -109,7 +109,11 @@ global:
     #   hosts: []
     #   secretName: ""
 
+  # Settings for sending usage data to the usage API server.
+  # +docs:property
   usageSender:
+    # The flag to enable sender.
+    enable: true
     # The address of the api-usage-server to send API usage data.
     apiUsageInternalServerAddr: api-usage-server-internal-grpc:8082
 
