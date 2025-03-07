@@ -11,7 +11,7 @@ export type ExpiresAfter = {
 }
 
 export type VectorStoreFileCounts = {
-  inProgress?: string
+  in_progress?: string
   completed?: string
   failed?: string
   cancelled?: string
@@ -21,20 +21,20 @@ export type VectorStoreFileCounts = {
 export type VectorStore = {
   id?: string
   object?: string
-  createdAt?: string
+  created_at?: string
   name?: string
-  usageBytes?: string
-  fileCounts?: VectorStoreFileCounts
+  usage_bytes?: string
+  file_counts?: VectorStoreFileCounts
   status?: string
-  expiresAfter?: ExpiresAfter
-  expiresAt?: string
-  lastActiveAt?: string
+  expires_after?: ExpiresAfter
+  expires_at?: string
+  last_active_at?: string
   metadata?: {[key: string]: string}
 }
 
 export type ChunkingStrategyStatic = {
-  maxChunkSizeTokens?: string
-  chunkOverlapTokens?: string
+  max_chunk_size_tokens?: string
+  chunk_overlap_tokens?: string
 }
 
 export type ChunkingStrategy = {
@@ -43,10 +43,10 @@ export type ChunkingStrategy = {
 }
 
 export type CreateVectorStoreRequest = {
-  fileIds?: string[]
+  file_ids?: string[]
   name?: string
-  expiresAfter?: ExpiresAfter
-  chunkingStrategy?: ChunkingStrategy
+  expires_after?: ExpiresAfter
+  chunking_strategy?: ChunkingStrategy
   metadata?: {[key: string]: string}
 }
 
@@ -60,9 +60,9 @@ export type ListVectorStoresRequest = {
 export type ListVectorStoresResponse = {
   object?: string
   data?: VectorStore[]
-  firstId?: string
-  lastId?: string
-  hasMore?: boolean
+  first_id?: string
+  last_id?: string
+  has_more?: boolean
 }
 
 export type GetVectorStoreRequest = {
@@ -76,7 +76,7 @@ export type GetVectorStoreByNameRequest = {
 export type UpdateVectorStoreRequest = {
   id?: string
   name?: string
-  expiresAfter?: ExpiresAfter
+  expires_after?: ExpiresAfter
   metadata?: {[key: string]: string}
 }
 
@@ -98,22 +98,22 @@ export type VectorStoreFileError = {
 export type VectorStoreFile = {
   id?: string
   object?: string
-  usageBytes?: string
-  createdAt?: string
-  vectorStoreId?: string
+  usage_bytes?: string
+  created_at?: string
+  vector_store_id?: string
   status?: string
-  lastError?: VectorStoreFileError
-  chunkingStrategy?: ChunkingStrategy
+  last_error?: VectorStoreFileError
+  chunking_strategy?: ChunkingStrategy
 }
 
 export type CreateVectorStoreFileRequest = {
-  vectorStoreId?: string
-  fileId?: string
-  chunkingStrategy?: ChunkingStrategy
+  vector_store_id?: string
+  file_id?: string
+  chunking_strategy?: ChunkingStrategy
 }
 
 export type ListVectorStoreFilesRequest = {
-  vectorStoreId?: string
+  vector_store_id?: string
   limit?: number
   order?: string
   after?: string
@@ -124,19 +124,19 @@ export type ListVectorStoreFilesRequest = {
 export type ListVectorStoreFilesResponse = {
   object?: string
   data?: VectorStoreFile[]
-  firstId?: string
-  lastId?: string
-  hasMore?: boolean
+  first_id?: string
+  last_id?: string
+  has_more?: boolean
 }
 
 export type GetVectorStoreFileRequest = {
-  vectorStoreId?: string
-  fileId?: string
+  vector_store_id?: string
+  file_id?: string
 }
 
 export type DeleteVectorStoreFileRequest = {
-  vectorStoreId?: string
-  fileId?: string
+  vector_store_id?: string
+  file_id?: string
 }
 
 export type DeleteVectorStoreFileResponse = {
@@ -146,9 +146,9 @@ export type DeleteVectorStoreFileResponse = {
 }
 
 export type SearchVectorStoreRequest = {
-  vectorStoreId?: string
+  vector_store_id?: string
   query?: string
-  numDocuments?: number
+  num_documents?: number
 }
 
 export type SearchVectorStoreResponse = {
@@ -175,16 +175,16 @@ export class VectorStoreService {
     return fm.fetchReq<DeleteVectorStoreRequest, DeleteVectorStoreResponse>(`/v1/vector_stores/${req["id"]}`, {...initReq, method: "DELETE"})
   }
   static CreateVectorStoreFile(req: CreateVectorStoreFileRequest, initReq?: fm.InitReq): Promise<VectorStoreFile> {
-    return fm.fetchReq<CreateVectorStoreFileRequest, VectorStoreFile>(`/v1/vector_stores/${req["vectorStoreId"]}/files`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<CreateVectorStoreFileRequest, VectorStoreFile>(`/v1/vector_stores/${req["vector_store_id"]}/files`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static ListVectorStoreFiles(req: ListVectorStoreFilesRequest, initReq?: fm.InitReq): Promise<ListVectorStoreFilesResponse> {
-    return fm.fetchReq<ListVectorStoreFilesRequest, ListVectorStoreFilesResponse>(`/v1/vector_stores/${req["vectorStoreId"]}/files?${fm.renderURLSearchParams(req, ["vectorStoreId"])}`, {...initReq, method: "GET"})
+    return fm.fetchReq<ListVectorStoreFilesRequest, ListVectorStoreFilesResponse>(`/v1/vector_stores/${req["vector_store_id"]}/files?${fm.renderURLSearchParams(req, ["vector_store_id"])}`, {...initReq, method: "GET"})
   }
   static GetVectorStoreFile(req: GetVectorStoreFileRequest, initReq?: fm.InitReq): Promise<VectorStoreFile> {
-    return fm.fetchReq<GetVectorStoreFileRequest, VectorStoreFile>(`/v1/vector_stores/${req["vectorStoreId"]}/files/${req["fileId"]}?${fm.renderURLSearchParams(req, ["vectorStoreId", "fileId"])}`, {...initReq, method: "GET"})
+    return fm.fetchReq<GetVectorStoreFileRequest, VectorStoreFile>(`/v1/vector_stores/${req["vector_store_id"]}/files/${req["file_id"]}?${fm.renderURLSearchParams(req, ["vector_store_id", "file_id"])}`, {...initReq, method: "GET"})
   }
   static DeleteVectorStoreFile(req: DeleteVectorStoreFileRequest, initReq?: fm.InitReq): Promise<DeleteVectorStoreFileResponse> {
-    return fm.fetchReq<DeleteVectorStoreFileRequest, DeleteVectorStoreFileResponse>(`/v1/vector_stores/${req["vectorStoreId"]}/files/${req["fileId"]}`, {...initReq, method: "DELETE"})
+    return fm.fetchReq<DeleteVectorStoreFileRequest, DeleteVectorStoreFileResponse>(`/v1/vector_stores/${req["vector_store_id"]}/files/${req["file_id"]}`, {...initReq, method: "DELETE"})
   }
 }
 export class VectorStoreInternalService {

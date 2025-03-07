@@ -4,7 +4,7 @@ export type ExpiresAfter = {
     days?: string;
 };
 export type VectorStoreFileCounts = {
-    inProgress?: string;
+    in_progress?: string;
     completed?: string;
     failed?: string;
     cancelled?: string;
@@ -13,31 +13,31 @@ export type VectorStoreFileCounts = {
 export type VectorStore = {
     id?: string;
     object?: string;
-    createdAt?: string;
+    created_at?: string;
     name?: string;
-    usageBytes?: string;
-    fileCounts?: VectorStoreFileCounts;
+    usage_bytes?: string;
+    file_counts?: VectorStoreFileCounts;
     status?: string;
-    expiresAfter?: ExpiresAfter;
-    expiresAt?: string;
-    lastActiveAt?: string;
+    expires_after?: ExpiresAfter;
+    expires_at?: string;
+    last_active_at?: string;
     metadata?: {
         [key: string]: string;
     };
 };
 export type ChunkingStrategyStatic = {
-    maxChunkSizeTokens?: string;
-    chunkOverlapTokens?: string;
+    max_chunk_size_tokens?: string;
+    chunk_overlap_tokens?: string;
 };
 export type ChunkingStrategy = {
     type?: string;
     static?: ChunkingStrategyStatic;
 };
 export type CreateVectorStoreRequest = {
-    fileIds?: string[];
+    file_ids?: string[];
     name?: string;
-    expiresAfter?: ExpiresAfter;
-    chunkingStrategy?: ChunkingStrategy;
+    expires_after?: ExpiresAfter;
+    chunking_strategy?: ChunkingStrategy;
     metadata?: {
         [key: string]: string;
     };
@@ -51,9 +51,9 @@ export type ListVectorStoresRequest = {
 export type ListVectorStoresResponse = {
     object?: string;
     data?: VectorStore[];
-    firstId?: string;
-    lastId?: string;
-    hasMore?: boolean;
+    first_id?: string;
+    last_id?: string;
+    has_more?: boolean;
 };
 export type GetVectorStoreRequest = {
     id?: string;
@@ -64,7 +64,7 @@ export type GetVectorStoreByNameRequest = {
 export type UpdateVectorStoreRequest = {
     id?: string;
     name?: string;
-    expiresAfter?: ExpiresAfter;
+    expires_after?: ExpiresAfter;
     metadata?: {
         [key: string]: string;
     };
@@ -84,20 +84,20 @@ export type VectorStoreFileError = {
 export type VectorStoreFile = {
     id?: string;
     object?: string;
-    usageBytes?: string;
-    createdAt?: string;
-    vectorStoreId?: string;
+    usage_bytes?: string;
+    created_at?: string;
+    vector_store_id?: string;
     status?: string;
-    lastError?: VectorStoreFileError;
-    chunkingStrategy?: ChunkingStrategy;
+    last_error?: VectorStoreFileError;
+    chunking_strategy?: ChunkingStrategy;
 };
 export type CreateVectorStoreFileRequest = {
-    vectorStoreId?: string;
-    fileId?: string;
-    chunkingStrategy?: ChunkingStrategy;
+    vector_store_id?: string;
+    file_id?: string;
+    chunking_strategy?: ChunkingStrategy;
 };
 export type ListVectorStoreFilesRequest = {
-    vectorStoreId?: string;
+    vector_store_id?: string;
     limit?: number;
     order?: string;
     after?: string;
@@ -107,17 +107,17 @@ export type ListVectorStoreFilesRequest = {
 export type ListVectorStoreFilesResponse = {
     object?: string;
     data?: VectorStoreFile[];
-    firstId?: string;
-    lastId?: string;
-    hasMore?: boolean;
+    first_id?: string;
+    last_id?: string;
+    has_more?: boolean;
 };
 export type GetVectorStoreFileRequest = {
-    vectorStoreId?: string;
-    fileId?: string;
+    vector_store_id?: string;
+    file_id?: string;
 };
 export type DeleteVectorStoreFileRequest = {
-    vectorStoreId?: string;
-    fileId?: string;
+    vector_store_id?: string;
+    file_id?: string;
 };
 export type DeleteVectorStoreFileResponse = {
     id?: string;
@@ -125,9 +125,9 @@ export type DeleteVectorStoreFileResponse = {
     deleted?: boolean;
 };
 export type SearchVectorStoreRequest = {
-    vectorStoreId?: string;
+    vector_store_id?: string;
     query?: string;
-    numDocuments?: number;
+    num_documents?: number;
 };
 export type SearchVectorStoreResponse = {
     documents?: string[];
