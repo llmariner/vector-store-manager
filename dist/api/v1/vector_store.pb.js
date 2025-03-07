@@ -24,16 +24,16 @@ export class VectorStoreService {
         return fm.fetchReq(`/v1/vector_stores/${req["id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
     static CreateVectorStoreFile(req, initReq) {
-        return fm.fetchReq(`/v1/vector_stores/${req["vectorStoreId"]}/files`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
+        return fm.fetchReq(`/v1/vector_stores/${req["vector_store_id"]}/files`, Object.assign(Object.assign({}, initReq), { method: "POST", body: JSON.stringify(req) }));
     }
     static ListVectorStoreFiles(req, initReq) {
-        return fm.fetchReq(`/v1/vector_stores/${req["vectorStoreId"]}/files?${fm.renderURLSearchParams(req, ["vectorStoreId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+        return fm.fetchReq(`/v1/vector_stores/${req["vector_store_id"]}/files?${fm.renderURLSearchParams(req, ["vector_store_id"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static GetVectorStoreFile(req, initReq) {
-        return fm.fetchReq(`/v1/vector_stores/${req["vectorStoreId"]}/files/${req["fileId"]}?${fm.renderURLSearchParams(req, ["vectorStoreId", "fileId"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
+        return fm.fetchReq(`/v1/vector_stores/${req["vector_store_id"]}/files/${req["file_id"]}?${fm.renderURLSearchParams(req, ["vector_store_id", "file_id"])}`, Object.assign(Object.assign({}, initReq), { method: "GET" }));
     }
     static DeleteVectorStoreFile(req, initReq) {
-        return fm.fetchReq(`/v1/vector_stores/${req["vectorStoreId"]}/files/${req["fileId"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
+        return fm.fetchReq(`/v1/vector_stores/${req["vector_store_id"]}/files/${req["file_id"]}`, Object.assign(Object.assign({}, initReq), { method: "DELETE" }));
     }
 }
 export class VectorStoreInternalService {
