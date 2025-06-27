@@ -18,8 +18,9 @@ const (
 // NewClient returns a new S3 client.
 func NewClient(ctx context.Context, c config.S3Config) (*Client, error) {
 	opts := laws.NewS3ClientOptions{
-		EndpointURL: c.EndpointURL,
-		Region:      c.Region,
+		EndpointURL:        c.EndpointURL,
+		Region:             c.Region,
+		InsecureSkipVerify: c.InsecureSkipVerify,
 	}
 	if ar := c.AssumeRole; ar != nil {
 		opts.AssumeRole = &laws.AssumeRole{
