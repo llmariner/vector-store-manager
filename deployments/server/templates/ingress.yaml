@@ -17,7 +17,10 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-  - http:
+  - {{- if .Values.global.ingress.host }}
+    host: {{ .Values.global.ingress.host }}
+    {{- end }}
+    http:
       paths:
       - path: /v1/vector_stores
         pathType: Prefix
