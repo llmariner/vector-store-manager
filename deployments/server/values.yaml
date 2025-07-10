@@ -328,7 +328,7 @@ securityContext:
 
 # Additional environment variables for the vector-store-manager-server container.
 # +docs:property
-# vectorStoreManagerServer:
+# vector-store-manager-server:
 #   env: []
 #   envFrom: []
 

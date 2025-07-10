@@ -76,12 +76,14 @@ spec:
               key: {{ .secretAccessKeyKey }}
         {{- end }}
         {{- end }}
-        {{- with .Values.vectorStoreManagerServer.env }}
+        {{- with index .Values "vector-store-manager-server" }}
+          {{- with .env -}} 
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.vectorStoreManagerServer.envFrom }}
+          {{- end }}
+          {{- with .envFrom }}
         envFrom:
         {{- toYaml . | nindent 8 }}
+          {{- end }}
         {{- end }}
         {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
