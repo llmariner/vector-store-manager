@@ -23,7 +23,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-      - name: vector-store-manager-server
+      - name: vectorStoreManagerServer
         securityContext:
           {{- toYaml .Values.securityContext | nindent 10 }}
         image: "{{ .Values.image.repository }}:{{ default .Chart.Version .Values.version }}"
@@ -76,7 +76,7 @@ spec:
               key: {{ .secretAccessKeyKey }}
         {{- end }}
         {{- end }}
-        {{- with index .Values "vector-store-manager-server" }}
+        {{- with .Values.vectorStoreManagerServer }}
           {{- with .env -}} 
         {{- toYaml . | nindent 8 }}
           {{- end }}
