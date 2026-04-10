@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.32.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.25
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3
-	github.com/go-logr/logr v1.4.2
+	github.com/go-logr/logr v1.4.3
 	github.com/go-logr/stdr v1.2.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/llm-operator/inference-manager v0.192.0
@@ -20,9 +20,9 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/tmc/langchaingo v0.1.11
-	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142
-	google.golang.org/grpc v1.67.0
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217
+	google.golang.org/grpc v1.79.3
+	google.golang.org/protobuf v1.36.10
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/gorm v1.25.12
 )
@@ -99,13 +99,13 @@ require (
 	gitlab.com/golang-commonmark/mdurl v0.0.0-20191124015652-932350d1cb84 // indirect
 	gitlab.com/golang-commonmark/puny v0.0.0-20191124015043-9f83538fa04f // indirect
 	golang.org/x/arch v0.12.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/crypto v0.46.0 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
-	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
+	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	gorm.io/driver/postgres v1.5.9 // indirect
 	gorm.io/driver/sqlite v1.5.5 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
