@@ -71,10 +71,10 @@ func (c *AuthConfig) Validate() error {
 }
 
 const (
-	// Ollama is an Ollama LLM kind.
+	// LLMEngineOllama indicates the Ollama LLM engine.
 	LLMEngineOllama = "ollama"
 
-	// VLLM is a VLLM LLM kind.
+	// LLMEngineVLLM indicates the vLLM LLM engine.
 	LLMEngineVLLM = "vllm"
 )
 
