@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-logr/stdr"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/llm-operator/inference-manager/pkg/llmkind"
 	"github.com/llmariner/api-usage/pkg/sender"
 	"github.com/llmariner/common/pkg/db"
 	fv1 "github.com/llmariner/file-manager/api/v1"
@@ -114,13 +113,13 @@ func run(ctx context.Context, c *config.Config) error {
 	var llm embedder.LLMClient
 	var dim int
 	switch c.LLMEngine {
-	case llmkind.Ollama:
+	case config.LLMEngineOllama:
 		llm = ollama.New(c.LLMEngineAddr)
 		dim, err = ollama.Dimension(c.Model)
 		if err != nil {
 			return err
 		}
-	case llmkind.VLLM:
+	case config.LLMEngineVLLM:
 		llm = vllm.NewClient(c.LLMEngineAddr, logger)
 		dim, err = vllm.Dimension(c.Model)
 		if err != nil {
