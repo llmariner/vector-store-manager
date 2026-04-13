@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/llm-operator/inference-manager/pkg/llmkind"
 	"github.com/llmariner/api-usage/pkg/sender"
 	"github.com/llmariner/common/pkg/db"
 	"gopkg.in/yaml.v3"
@@ -71,6 +70,14 @@ func (c *AuthConfig) Validate() error {
 	return nil
 }
 
+const (
+	// Ollama is an Ollama LLM kind.
+	LLMEngineOllama = "ollama"
+
+	// VLLM is a VLLM LLM kind.
+	LLMEngineVLLM = "vllm"
+)
+
 // Config is the configuration.
 type Config struct {
 	GRPCPort         int `yaml:"grpcPort"`
@@ -132,7 +139,7 @@ func (c *Config) Validate() error {
 		return err
 	}
 	switch c.LLMEngine {
-	case llmkind.Ollama, llmkind.VLLM:
+	case LLMEngineOllama, LLMEngineVLLM:
 		break
 	default:
 		return fmt.Errorf("unsupported llm engine: %q", c.LLMEngine)

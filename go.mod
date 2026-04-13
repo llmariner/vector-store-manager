@@ -9,7 +9,6 @@ require (
 	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/stdr v1.2.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
-	github.com/llm-operator/inference-manager v0.192.0
 	github.com/llmariner/api-usage v1.2.0
 	github.com/llmariner/common v0.19.0
 	github.com/llmariner/file-manager v1.1.0
